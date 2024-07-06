@@ -1,0 +1,52 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ElevatorSimulation.Application", "ElevatorSimulation.Application\ElevatorSimulation.Application.csproj", "{BE936A1B-41E8-491F-9A12-45E7852364D9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ElevatorSimulation.Application.Tests", "ElevatorSimulation.Application.Tests\ElevatorSimulation.Application.Tests.csproj", "{94245C52-F9E0-448D-9386-7F8BBA17064C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ElevatorSimulation.Domain", "ElevatorSimulation.Domain\ElevatorSimulation.Domain.csproj", "{B4510443-8C18-4001-976D-6E53B79FD156}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ElevatorSimulation.Domain.Tests", "ElevatorSimulation.Domain.Tests\ElevatorSimulation.Domain.Tests.csproj", "{030413D8-6777-42BD-BFFB-BEAD17FBCCCC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ElevatorSimulation.InterfaceAdapters", "ElevatorSimulation.InterfaceAdapters\ElevatorSimulation.InterfaceAdapters.csproj", "{02F2F9C6-508A-4593-B080-3F32C9A325B1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ElevatorSimulation.ConsoleApp", "ElevatorSimulation.ConsoleApp\ElevatorSimulation.ConsoleApp.csproj", "{19AFE68E-38AE-4FAF-9584-7BD7C2682A7A}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{BE936A1B-41E8-491F-9A12-45E7852364D9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BE936A1B-41E8-491F-9A12-45E7852364D9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BE936A1B-41E8-491F-9A12-45E7852364D9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BE936A1B-41E8-491F-9A12-45E7852364D9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{94245C52-F9E0-448D-9386-7F8BBA17064C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{94245C52-F9E0-448D-9386-7F8BBA17064C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{94245C52-F9E0-448D-9386-7F8BBA17064C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{94245C52-F9E0-448D-9386-7F8BBA17064C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B4510443-8C18-4001-976D-6E53B79FD156}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B4510443-8C18-4001-976D-6E53B79FD156}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B4510443-8C18-4001-976D-6E53B79FD156}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B4510443-8C18-4001-976D-6E53B79FD156}.Release|Any CPU.Build.0 = Release|Any CPU
+		{030413D8-6777-42BD-BFFB-BEAD17FBCCCC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{030413D8-6777-42BD-BFFB-BEAD17FBCCCC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{030413D8-6777-42BD-BFFB-BEAD17FBCCCC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{030413D8-6777-42BD-BFFB-BEAD17FBCCCC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{02F2F9C6-508A-4593-B080-3F32C9A325B1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{02F2F9C6-508A-4593-B080-3F32C9A325B1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{02F2F9C6-508A-4593-B080-3F32C9A325B1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{02F2F9C6-508A-4593-B080-3F32C9A325B1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{19AFE68E-38AE-4FAF-9584-7BD7C2682A7A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{19AFE68E-38AE-4FAF-9584-7BD7C2682A7A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{19AFE68E-38AE-4FAF-9584-7BD7C2682A7A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{19AFE68E-38AE-4FAF-9584-7BD7C2682A7A}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
