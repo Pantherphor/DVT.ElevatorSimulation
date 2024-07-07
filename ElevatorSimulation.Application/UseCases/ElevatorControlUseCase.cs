@@ -15,7 +15,7 @@ namespace ElevatorSimulation.Application.UseCases
         public void AddTargetFloor(int elevatorId, int targetFloor)
         {
             var elevator = _building.Elevators[elevatorId];
-            elevator.AddTargetFloor(targetFloor);
+            elevator.AddFloorRequest(targetFloor);
         }
 
         public async Task MoveElevatorsAsync()

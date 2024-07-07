@@ -1,7 +1,13 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
+    <InternalsVisibleTo>ElevatorSimulation.InterfaceAdapters</InternalsVisibleTo>
   </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ElevatorSimulation.Application\ElevatorSimulation.Application.csproj" />
+    <ProjectReference Include="..\ElevatorSimulation.Domain\ElevatorSimulation.Domain.csproj" />
+  </ItemGroup>
 
 </Project>

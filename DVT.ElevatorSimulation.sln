@@ -15,6 +15,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ElevatorSimulation.Interfac
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ElevatorSimulation.ConsoleApp", "ElevatorSimulation.ConsoleApp\ElevatorSimulation.ConsoleApp.csproj", "{19AFE68E-38AE-4FAF-9584-7BD7C2682A7A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ElevatorSimulation.InterfaceAdapters.Tests", "ElevatorSimulation.InterfaceAdapters.Tests\ElevatorSimulation.InterfaceAdapters.Tests.csproj", "{EF760B50-A9D8-4D18-8B0B-F251FC0AA112}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -48,5 +50,9 @@ Global
 		{19AFE68E-38AE-4FAF-9584-7BD7C2682A7A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{19AFE68E-38AE-4FAF-9584-7BD7C2682A7A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{19AFE68E-38AE-4FAF-9584-7BD7C2682A7A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EF760B50-A9D8-4D18-8B0B-F251FC0AA112}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EF760B50-A9D8-4D18-8B0B-F251FC0AA112}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EF760B50-A9D8-4D18-8B0B-F251FC0AA112}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EF760B50-A9D8-4D18-8B0B-F251FC0AA112}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

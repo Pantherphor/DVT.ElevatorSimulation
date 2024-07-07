@@ -14,7 +14,6 @@ namespace ElevatorSimulation.Domain.Tests
 
             //assert
             Assert.Equal(0, elevator.CurrentFloor);
-            Assert.Empty(elevator.TargetFloors);
             Assert.Equal(enElevatorState.Idle, elevator.State);
         }
 
@@ -25,10 +24,12 @@ namespace ElevatorSimulation.Domain.Tests
             var elevator = new Elevator();
             
             //action
-            elevator.AddTargetFloor(5);
-            
+            elevator.AddFloorRequest(5);
+
             //assert
-            Assert.Contains(5, elevator.TargetFloors);
+            Assert.Equal(0, elevator.CurrentFloor);
+            Assert.Equal(enElevatorDirection.Stationery, elevator.Direction);
+            Assert.Equal(enElevatorState.Idle, elevator.State);
         }
 
         [Fact]
@@ -38,11 +39,11 @@ namespace ElevatorSimulation.Domain.Tests
             var elevator = new Elevator();
 
             //action
-            elevator.AddTargetFloor(5);
-            elevator.MoveToNextFloor();
-            
+            elevator.AddFloorRequest(5);
+
             //assert
-            Assert.Equal(5, elevator.CurrentFloor);
+            Assert.False(elevator.IsMoving);
+            Assert.Equal(0, elevator.CurrentFloor);
         }
 
         [Fact]
