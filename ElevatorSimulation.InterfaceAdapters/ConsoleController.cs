@@ -1,4 +1,5 @@
 ﻿using ElevatorSimulation.Domain.Entities;
+using ElevatorSimulation.Domain.Interfaces;
 using System;
 using System.Runtime.CompilerServices;
 
@@ -58,7 +59,7 @@ namespace ElevatorSimulation.InterfaceAdapters
                 Console.Write("Enter the number of passengers: ");
                 if (int.TryParse(Console.ReadLine(), out int passengers))
                 {
-                    elevatorSystem.CallElevator(floor, passengers);
+                    elevatorSystem.CallElevator(new FloorRequest(floor, passengers));
                 }
                 else
                 {

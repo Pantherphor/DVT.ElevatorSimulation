@@ -24,7 +24,7 @@ namespace ElevatorSimulation.Domain.Tests
             var elevator = new Elevator();
             
             //action
-            elevator.AddFloorRequest(5);
+            elevator.AddFloorRequest(new FloorRequest(5, 2));
 
             //assert
             Assert.Equal(0, elevator.CurrentFloor);
@@ -39,7 +39,7 @@ namespace ElevatorSimulation.Domain.Tests
             var elevator = new Elevator();
 
             //action
-            elevator.AddFloorRequest(5);
+            elevator.AddFloorRequest(new FloorRequest(5, 2));
 
             //assert
             Assert.False(elevator.IsMoving);

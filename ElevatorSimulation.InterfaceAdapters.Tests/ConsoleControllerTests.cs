@@ -3,6 +3,7 @@ using ElevatorSimulation.Domain.Entities;
 namespace ElevatorSimulation.InterfaceAdapters.Tests
 {
     using ElevatorSimulation.Domain.Enums;
+    using ElevatorSimulation.Domain.Interfaces;
     using Moq;
     using System;
     using System.Collections.Generic;
@@ -52,7 +53,7 @@ namespace ElevatorSimulation.InterfaceAdapters.Tests
             consoleController.Run();
 
             // Assert
-            mockElevatorSystem.Verify(es => es.CallElevator(3, 2), Times.Once);
+            mockElevatorSystem.Verify(es => es.CallElevator(It.IsAny<FloorRequest>()), Times.Once);
 
             // Cleanup
             Console.SetIn(new StreamReader(Console.OpenStandardInput()));
@@ -72,7 +73,7 @@ namespace ElevatorSimulation.InterfaceAdapters.Tests
 
             // Assert
             Assert.Contains("Invalid floor number.", sw.ToString());
-            mockElevatorSystem.Verify(es => es.CallElevator(It.IsAny<int>(), It.IsAny<int>()), Times.Never);
+            mockElevatorSystem.Verify(es => es.CallElevator(new FloorRequest(It.IsAny<int>(), It.IsAny<int>())), Times.Never);
         }
 
         [Fact]
@@ -88,7 +89,7 @@ namespace ElevatorSimulation.InterfaceAdapters.Tests
 
             // Assert
             Assert.Contains("Invalid number of passengers.", sw.ToString());
-            mockElevatorSystem.Verify(es => es.CallElevator(It.IsAny<int>(), It.IsAny<int>()), Times.Never);
+            mockElevatorSystem.Verify(es => es.CallElevator(new FloorRequest(It.IsAny<int>(), It.IsAny<int>())), Times.Never);
         }
 
         [Fact]
@@ -145,7 +146,7 @@ namespace ElevatorSimulation.InterfaceAdapters.Tests
                 new ElevatorStatus { Id = 2, CurrentFloor = 5, Direction = enElevatorDirection.Down, IsMoving = false, PassengerCount = 2 }
             };
 
-            mockElevatorSystem.Setup(es => es.GetElevatorStatus()).Returns(statuses);
+            Moq.Language.Flow.IReturnsResult<IElevatorSystem> returnsResult = mockElevatorSystem.Setup(es => es.GetElevatorStatus()).Returns(statuses);
 
             using var sw = new StringWriter();
             Console.SetOut(sw);

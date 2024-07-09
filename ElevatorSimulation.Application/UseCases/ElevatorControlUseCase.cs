@@ -12,10 +12,10 @@ namespace ElevatorSimulation.Application.UseCases
             _building = building;
         }
 
-        public void AddTargetFloor(int elevatorId, int targetFloor)
+        public void AddTargetFloor(FloorRequest floorRequest, int elevatorId)//(int elevatorId, int targetFloor)
         {
             var elevator = _building.Elevators[elevatorId];
-            elevator.AddFloorRequest(targetFloor);
+            elevator.AddFloorRequest(floorRequest);
         }
 
         public async Task MoveElevatorsAsync()

@@ -1,45 +1,36 @@
 ﻿using ElevatorSimulation.Domain.Enums;
+using ElevatorSimulation.Domain.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace ElevatorSimulation.Domain.Entities
 {
-    public interface IElevator
-    {
-        int CurrentFloor { get; set; }
-        enElevatorDirection Direction { get; set; }
-        int Id { get; }
-        bool IsMoving { get; }
-        int PassengerCount { get; }
-        enElevatorState State { get; }
-
-        void AddFloorRequest(int targetFloor);
-        void DisplayStatus();
-    }
-
     public class Elevator : IElevator
     {
         public int CurrentFloor { get; set; }
         public enElevatorState State { get; private set; }
-        public int Id { get; internal set; }
-        public int PassengerCount { get; internal set; }
-        public bool IsMoving { get; internal set; }
+        public int Id { get; set; }
+        public int PassengerCount { get; set; }
+        public bool IsMoving { get; set; }
         public enElevatorDirection Direction { get; set; }
 
+        public int MaxPassengerLimit { get; set; }
 
-        private readonly Queue<int> floorRequests;
-        private Task processingTask;
+        public Queue<FloorRequest> FloorRequests => floorRequests;
+
+        private readonly Queue<FloorRequest> floorRequests;
 
         public Elevator()
         {
             CurrentFloor = 0;
-            floorRequests = new Queue<int>();
+            floorRequests = new Queue<FloorRequest>();
             State = enElevatorState.Idle;
             Direction = enElevatorDirection.Stationery;
         }
 
-        public void AddFloorRequest(int targetFloor)
+
+        public void AddFloorRequest(FloorRequest targetFloor)
         {
             floorRequests.Enqueue(targetFloor);
         }
@@ -48,8 +39,10 @@ namespace ElevatorSimulation.Domain.Entities
         {
             if (floorRequests.Count > 0)
             {
-                int nextFloor = floorRequests.Dequeue();
+                var floorRequest = floorRequests.Dequeue();
+                int nextFloor = floorRequest.Floor;
                 IsMoving = true;
+                PassengerCount = floorRequest.PassengerCount;
                 Direction = nextFloor > CurrentFloor ? enElevatorDirection.Up : enElevatorDirection.Down;
                 State = enElevatorState.Moving;
 

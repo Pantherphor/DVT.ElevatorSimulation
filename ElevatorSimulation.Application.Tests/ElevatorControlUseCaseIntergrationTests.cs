@@ -18,7 +18,7 @@ namespace ElevatorSimulation.Application.Tests
             var useCase = new ElevatorControlUseCase(building);
 
             //action
-            useCase.AddTargetFloor(elevetorId, targetFloor);
+            useCase.AddTargetFloor(new FloorRequest(targetFloor, 2), elevetorId);
 
             //assert
             Assert.False(building.Elevators[elevetorId].IsMoving);
@@ -28,20 +28,20 @@ namespace ElevatorSimulation.Application.Tests
         [InlineData(0, 5)]
         [InlineData(2, 3)]
         [InlineData(1, 10)]
-        public async Task MoveElevatorsAsync_Should_Move_Elevators_To_Next_Floor(int elevatorId, int tagetFoor)
+        public async Task MoveElevatorsAsync_Should_Move_Elevators_To_Next_Floor(int elevatorId, int targetFloor)
         {
             //arrange
             var building = new Building(0, 10, 3);
             var useCase = new ElevatorControlUseCase(building);
 
             //action
-            useCase.AddTargetFloor(elevatorId, tagetFoor);
+            useCase.AddTargetFloor(new FloorRequest(targetFloor, 2), elevatorId);
             await useCase.MoveElevatorsAsync();
 
             await Task.Delay(10500); // Wait for the elevator to process
 
             //assert
-            Assert.Equal(tagetFoor, building.Elevators[elevatorId].CurrentFloor);
+            Assert.Equal(targetFloor, building.Elevators[elevatorId].CurrentFloor);
         }
 
     }
