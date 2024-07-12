@@ -12,7 +12,7 @@ namespace ElevatorSimulation.Application.UseCases
             _building = building;
         }
 
-        public void AddTargetFloor(FloorRequest floorRequest, int elevatorId)//(int elevatorId, int targetFloor)
+        public void AddTargetFloor(FloorRequest floorRequest, int elevatorId)
         {
             var elevator = _building.Elevators[elevatorId];
             elevator.AddFloorRequest(floorRequest);
@@ -22,7 +22,7 @@ namespace ElevatorSimulation.Application.UseCases
         {
             foreach (var elevator in _building.Elevators)
             {
-                await Task.Run(() => elevator.MoveToNextFloor());
+                await elevator.MoveToNextFloorAsync();
             }
         }
 

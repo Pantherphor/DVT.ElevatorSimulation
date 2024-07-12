@@ -24,7 +24,7 @@ namespace ElevatorSimulation.Application.Tests
             Assert.False(building.Elevators[elevetorId].IsMoving);
         }
 
-        [Theory(Timeout = 10550)]
+        [Theory(Timeout = 66000)]
         [InlineData(0, 5)]
         [InlineData(2, 3)]
         [InlineData(1, 10)]
@@ -38,7 +38,7 @@ namespace ElevatorSimulation.Application.Tests
             useCase.AddTargetFloor(new FloorRequest(targetFloor, 2), elevatorId);
             await useCase.MoveElevatorsAsync();
 
-            await Task.Delay(10500); // Wait for the elevator to process
+            await Task.Delay(15500); // Wait for the elevator to process
 
             //assert
             Assert.Equal(targetFloor, building.Elevators[elevatorId].CurrentFloor);

@@ -26,9 +26,9 @@ namespace ElevatorSimulation.Application.Tests
                 mockElevator.Setup(e => e.AddFloorRequest(It.IsAny<FloorRequest>()))
                     .Callback<FloorRequest>(request =>
                 {
-                    mockElevator.Object.FloorRequests.Enqueue(request);
+                    mockElevator.Object.FloorRequests.Add(request);
                 });
-                mockElevator.Setup(e => e.FloorRequests).Returns(new Queue<FloorRequest>());
+                mockElevator.Setup(e => e.FloorRequests).Returns(new List<FloorRequest>());
                 mockElevator.Object.CurrentFloor = 0;
                 mockElevator.Object.PassengerCount = 0;
                 mockElevator.Object.Id = i + 1;

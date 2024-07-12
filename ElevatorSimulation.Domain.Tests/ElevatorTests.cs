@@ -31,9 +31,23 @@ namespace ElevatorSimulation.Domain.Tests
             Assert.Equal(enElevatorDirection.None, elevator.Direction);
             Assert.Equal(enElevatorDoorState.Closed, elevator.DoorState);
         }
+        
+        [Fact]
+        public void MoveToNextFloor_Should_Move_Elevator_To_Next_Floor_No_Request_Should_Not_Fail()
+        {
+            //arrange
+            var elevator = new Elevator();
+
+            //action
+            elevator.MoveToNextFloorAsync();
+
+            //assert
+            Assert.Equal(0, elevator.CurrentFloor);
+            Assert.Equal(enElevatorDoorState.Closed, elevator.DoorState);
+        }
 
         [Fact]
-        public void MoveToNextFloor_Should_Move_Elevator_To_Next_Floor()
+        public void MoveToNextFloor_Should_Not_Move_Elevator_To_Next_Floor()
         {
             //arrange
             var elevator = new Elevator();
@@ -47,16 +61,21 @@ namespace ElevatorSimulation.Domain.Tests
         }
 
         [Fact]
-        public void MoveToNextFloor_Should_Move_Elevator_To_Next_Floor_Idle()
+        public async void MoveToNextFloor_Should_Move_Elevator_To_Next_Floor_First_Request_Floor()
         {
             //arrange
             var elevator = new Elevator();
+            elevator.AddFloorRequest(new FloorRequest(5, 2));
+            elevator.AddFloorRequest(new FloorRequest(3, 3));
+            elevator.AddFloorRequest(new FloorRequest(8, 4));
 
             //action
-            elevator.MoveToNextFloor();
+            await elevator.MoveToNextFloorAsync();
 
             //assert
-            Assert.Equal(0, elevator.CurrentFloor);
+            Assert.Equal(5, elevator.CurrentFloor);
+            Assert.Equal(2, elevator.FloorRequests.Count);
+            Assert.Equal(0, elevator.PassengerCount);
             Assert.Equal(enElevatorDoorState.Closed, elevator.DoorState);
         }
     }

@@ -5,10 +5,10 @@
         private readonly int targetFloor;
         private readonly int passengerCount;
 
-        public FloorRequest(int targetFloor, int excessPassengers)
+        public FloorRequest(int targetFloor, int passengers)
         {
             this.targetFloor = targetFloor;
-            this.passengerCount = excessPassengers;
+            this.passengerCount = passengers;
         }
 
         public int TargetFloor => targetFloor;

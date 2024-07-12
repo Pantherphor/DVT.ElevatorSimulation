@@ -1,7 +1,7 @@
 ﻿using ElevatorSimulation.Domain.Enums;
 using ElevatorSimulation.Domain.Interfaces;
-using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace ElevatorSimulation.Domain.Entities
@@ -18,12 +18,12 @@ namespace ElevatorSimulation.Domain.Entities
         public enElevatorDirection Direction { get; set; }
 
 
-        public Queue<FloorRequest> FloorRequests { get; }
+        public IList<FloorRequest> FloorRequests { get; }
 
         public Elevator()
         {
             CurrentFloor = 0;
-            FloorRequests = new Queue<FloorRequest>();
+            FloorRequests = new List<FloorRequest>();
             DoorState = enElevatorDoorState.Closed;
             Direction = enElevatorDirection.None;
         }
@@ -31,32 +31,66 @@ namespace ElevatorSimulation.Domain.Entities
 
         public void AddFloorRequest(FloorRequest targetFloor)
         {
-            FloorRequests.Enqueue(targetFloor);
+            FloorRequests.Add(targetFloor);
         }
 
-        public async void MoveToNextFloor()
+        public async Task MoveToNextFloorAsync()
         {
-            if (FloorRequests.Count > 0)
+            if (FloorRequests.Any())
             {
-                var floorRequest = FloorRequests.Dequeue();
-                int tagerFloor = floorRequest.TargetFloor;
-                IsMoving = true;
+                var floorRequest = FloorRequests.FirstOrDefault();
                 PassengerCount = floorRequest.PassengerCount;
-                Direction = tagerFloor > CurrentFloor ? enElevatorDirection.Up : enElevatorDirection.Down;
-                DoorState = enElevatorDoorState.Closed;
+                int targetFloor = floorRequest.TargetFloor;
+                if (!IsMoving && CurrentFloor != targetFloor)
+                {
+                    Direction = targetFloor > CurrentFloor ? enElevatorDirection.Up : enElevatorDirection.Down;
+                    IsMoving = true;
 
-                await Task.Delay(Math.Abs(tagerFloor - CurrentFloor) * 1000); // Simulate time to move
+                    int step = Direction == enElevatorDirection.Up ? 1 : -1;
+                    while (CurrentFloor != targetFloor)
+                    {
+                        await Task.Delay(1000); // Simulate time to move one floor
+                        CurrentFloor += step;
+                        if (CurrentFloor != targetFloor)
+                        {
+                            await HandlePassengersAtCurrentFloor();
+                        }
+                    }
 
-                CurrentFloor = tagerFloor;
-                IsMoving = false;
-                Direction = enElevatorDirection.None;
-                DoorState = enElevatorDoorState.Closed;
+                    IsMoving = false;
+                }
             }
-            else
+            
+        }
+
+        private async Task HandlePassengersAtCurrentFloor()
+        {
+            var offloadingRequests = FloorRequests.Where(r => r.TargetFloor == CurrentFloor).ToList();
+
+            foreach (var request in offloadingRequests)
             {
-                Direction = enElevatorDirection.None;
-                DoorState = enElevatorDoorState.Closed;
+                await OffloadPassengers(request);
             }
+        }
+
+        private async Task OffloadPassengers(FloorRequest floorRequest)
+        {
+            await Task.Delay(2000); // Simulate door opened time while offloading
+
+            if (CurrentFloor == floorRequest.TargetFloor)
+            {
+                PassengerCount -= floorRequest.PassengerCount;
+                RemoveFloorRequest(floorRequest);
+                if (PassengerCount < 0)
+                {
+                    PassengerCount = 0;
+                }
+            }
+        }
+
+        private void RemoveFloorRequest(FloorRequest floorRequest)
+        {
+            FloorRequests.Remove(floorRequest);
         }
 
         public ElevatorStatus GetElevatorStatus()

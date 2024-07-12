@@ -1,16 +1,17 @@
 ﻿using ElevatorSimulation.Domain.Entities;
 using ElevatorSimulation.Domain.Enums;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace ElevatorSimulation.Domain.Interfaces
 {
 
     public interface IElevatorOparations
     {
-        Queue<FloorRequest> FloorRequests { get; }
+        IList<FloorRequest> FloorRequests { get; }
 
         void AddFloorRequest(FloorRequest targetFloor);
-        void MoveToNextFloor();
+        Task MoveToNextFloorAsync();
         ElevatorStatus GetElevatorStatus();
     }
 
