@@ -1,10 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using ElevatorSimulation.Domain.Interfaces;
+using System.Collections.Generic;
 
 namespace ElevatorSimulation.Domain.Entities
 {
     public class Building
     {
-        public List<Elevator> Elevators { get; private set; }
+        public List<IElevator> Elevators { get; private set; }
         public int MinFloor { get; private set; }
         public int MaxFloor { get; private set; }
 
@@ -12,7 +13,7 @@ namespace ElevatorSimulation.Domain.Entities
         {
             MinFloor = minFloor;
             MaxFloor = maxFloor;
-            Elevators = new List<Elevator>();
+            Elevators = new List<IElevator>();
 
             for (int i = 0; i < elevatorCount; i++)
             {

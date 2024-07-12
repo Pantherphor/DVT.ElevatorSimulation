@@ -9,23 +9,16 @@ namespace ElevatorSimulation.Services
 {
     public class ElevatorSystem : IElevatorSystem
     {
-        private readonly List<IElevator> elevators;
-        private readonly int maxPassengerLimit;
+        private readonly IEnumerable<IElevator> elevators;
         private IOverloadStrategy overloadStrategy;
 
-        public ElevatorSystem(int numberOfElevators, int maxPassengerLimit)
+        public ElevatorSystem(IEnumerable<IElevator> elevators)
         {
-            this.maxPassengerLimit = maxPassengerLimit;
-            elevators = new List<IElevator>();
+            this.elevators = elevators;
             this.overloadStrategy = new DefaultOverloadStrategy();
-
-            for (int i = 0; i < numberOfElevators; i++)
-            {
-                elevators.Add(new Elevator { Id = i + 1, CurrentFloor = 0, PassengerCount = 0, IsMoving = false });
-            }
         }
 
-        public List<IElevator> Elevators => elevators;
+        public IEnumerable<IElevator> Elevators => elevators;
 
         public void SetOverloadStrategy(IOverloadStrategy strategy)
         {
@@ -34,21 +27,20 @@ namespace ElevatorSimulation.Services
 
         public void CallElevator(FloorRequest request)
         {
-            var nearestElevator = elevators.OrderBy(e => Math.Abs(e.CurrentFloor - request.Floor))
+            var nearestElevator = elevators.OrderBy(e => Math.Abs(e.CurrentFloor - request.TargetFloor))
                                             .ThenBy(e => e.PassengerCount)
                                             .FirstOrDefault();
 
             if (nearestElevator != null)
             {
-                nearestElevator.AddFloorRequest(new FloorRequest(request.Floor, request.PassengerCount));
+                nearestElevator.AddFloorRequest(new FloorRequest(request.TargetFloor, request.PassengerCount));
                 nearestElevator.PassengerCount += request.PassengerCount;
 
-                if (nearestElevator.PassengerCount > maxPassengerLimit)
+                if (nearestElevator.IsFull())
                 {
                     // Handle overloading by moving excess passengers to another elevator or other logic
-                    int excessPassengers = nearestElevator.PassengerCount - maxPassengerLimit;
-                    nearestElevator.PassengerCount = maxPassengerLimit;
-                    overloadStrategy.HandleOverload(this, nearestElevator, request.Floor, excessPassengers);
+                    int excessPassengers = nearestElevator.GetExcessPassangers();
+                    overloadStrategy.HandleOverload(this, nearestElevator, request.TargetFloor, excessPassengers);
                 }
             }
         }
@@ -63,16 +55,9 @@ namespace ElevatorSimulation.Services
             }
         }
 
-        public List<ElevatorStatus> GetElevatorStatus()
+        public IEnumerable<ElevatorStatus> GetElevatorStatus()
         {
-            return elevators.Select(e => new ElevatorStatus
-            {
-                Id = e.Id,
-                CurrentFloor = e.CurrentFloor,
-                Direction = e.Direction,
-                IsMoving = e.IsMoving,
-                PassengerCount = e.PassengerCount
-            }).ToList();
+            return elevators.Select(o => o.GetElevatorStatus());
         }
     }
 }

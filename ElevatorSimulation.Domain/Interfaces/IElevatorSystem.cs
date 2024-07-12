@@ -5,10 +5,10 @@ namespace ElevatorSimulation.Domain.Interfaces
 {
     public interface IElevatorSystem
     {
-        List<IElevator> Elevators { get; }
+        IEnumerable<IElevator> Elevators { get; }
 
         void CallElevator(FloorRequest request);
         void MoveElevator(int elevatorId, int floor);
-        List<ElevatorStatus> GetElevatorStatus();
+        IEnumerable<ElevatorStatus> GetElevatorStatus();
     }
 }

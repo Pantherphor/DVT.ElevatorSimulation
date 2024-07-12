@@ -30,7 +30,7 @@ namespace ElevatorSimulation.Application.UseCases
         {
             foreach (var elevator in _building.Elevators)
             {
-                elevator.DisplayStatus();
+                elevator.GetElevatorStatus();
             }
         }
     }

@@ -4,18 +4,28 @@ using System.Collections.Generic;
 
 namespace ElevatorSimulation.Domain.Interfaces
 {
-    public interface IElevator
+
+    public interface IElevatorOparations
     {
-        int CurrentFloor { get; set; }
-        enElevatorDirection Direction { get; set; }
-        int Id { get; }
-        bool IsMoving { get; }
-        int PassengerCount { get; set; }
-        enElevatorState State { get; }
-        int MaxPassengerLimit { get; }
+        Queue<FloorRequest> FloorRequests { get; }
 
         void AddFloorRequest(FloorRequest targetFloor);
-        void DisplayStatus();
-        Queue<FloorRequest> FloorRequests { get; }
+        void MoveToNextFloor();
+        ElevatorStatus GetElevatorStatus();
+    }
+
+    public interface IElevator : IElevatorOparations
+    {
+        int Id { get; set; }
+        int CurrentFloor { get; set; }
+        bool IsMoving { get; }
+        int PassengerCount { get; set; }
+        int MaxPassengerLimit { get; }
+
+        enElevatorDirection Direction { get; set; }
+        enElevatorDoorState DoorState { get; }
+
+        bool IsFull();
+        int GetExcessPassangers();
     }
 }

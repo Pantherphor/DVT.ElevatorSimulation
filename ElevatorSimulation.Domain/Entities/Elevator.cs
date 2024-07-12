@@ -9,60 +9,76 @@ namespace ElevatorSimulation.Domain.Entities
     public class Elevator : IElevator
     {
         public int CurrentFloor { get; set; }
-        public enElevatorState State { get; private set; }
         public int Id { get; set; }
         public int PassengerCount { get; set; }
         public bool IsMoving { get; set; }
-        public enElevatorDirection Direction { get; set; }
-
         public int MaxPassengerLimit { get; set; }
 
-        public Queue<FloorRequest> FloorRequests => floorRequests;
+        public enElevatorDoorState DoorState { get; private set; }
+        public enElevatorDirection Direction { get; set; }
 
-        private readonly Queue<FloorRequest> floorRequests;
+
+        public Queue<FloorRequest> FloorRequests { get; }
 
         public Elevator()
         {
             CurrentFloor = 0;
-            floorRequests = new Queue<FloorRequest>();
-            State = enElevatorState.Idle;
-            Direction = enElevatorDirection.Stationery;
+            FloorRequests = new Queue<FloorRequest>();
+            DoorState = enElevatorDoorState.Closed;
+            Direction = enElevatorDirection.None;
         }
 
 
         public void AddFloorRequest(FloorRequest targetFloor)
         {
-            floorRequests.Enqueue(targetFloor);
+            FloorRequests.Enqueue(targetFloor);
         }
 
         public async void MoveToNextFloor()
         {
-            if (floorRequests.Count > 0)
+            if (FloorRequests.Count > 0)
             {
-                var floorRequest = floorRequests.Dequeue();
-                int nextFloor = floorRequest.Floor;
+                var floorRequest = FloorRequests.Dequeue();
+                int tagerFloor = floorRequest.TargetFloor;
                 IsMoving = true;
                 PassengerCount = floorRequest.PassengerCount;
-                Direction = nextFloor > CurrentFloor ? enElevatorDirection.Up : enElevatorDirection.Down;
-                State = enElevatorState.Moving;
+                Direction = tagerFloor > CurrentFloor ? enElevatorDirection.Up : enElevatorDirection.Down;
+                DoorState = enElevatorDoorState.Closed;
 
-                await Task.Delay(Math.Abs(nextFloor - CurrentFloor) * 1000); // Simulate time to move
+                await Task.Delay(Math.Abs(tagerFloor - CurrentFloor) * 1000); // Simulate time to move
 
-                CurrentFloor = nextFloor;
+                CurrentFloor = tagerFloor;
                 IsMoving = false;
-                Direction = enElevatorDirection.Stationery;
-                State = enElevatorState.Idle;
+                Direction = enElevatorDirection.None;
+                DoorState = enElevatorDoorState.Closed;
             }
             else
             {
-                Direction = enElevatorDirection.Stationery;
-                State = enElevatorState.Idle;
+                Direction = enElevatorDirection.None;
+                DoorState = enElevatorDoorState.Closed;
             }
         }
 
-        public void DisplayStatus()
+        public ElevatorStatus GetElevatorStatus()
         {
-            throw new NotImplementedException();
+            return new ElevatorStatus
+            {
+                Id = Id,
+                CurrentFloor = CurrentFloor,
+                Direction = Direction,
+                IsMoving = IsMoving,
+                PassengerCount = PassengerCount
+            };
+        }
+
+        public bool IsFull()
+        {
+            return PassengerCount > MaxPassengerLimit;
+        }
+
+        public int GetExcessPassangers()
+        {
+            return PassengerCount - MaxPassengerLimit;
         }
     }
 }

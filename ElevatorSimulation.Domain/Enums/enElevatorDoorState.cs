@@ -1,8 +1,7 @@
 ﻿namespace ElevatorSimulation.Domain.Enums
 {
-    public enum enElevatorState
+    public enum enElevatorDoorState
     {
-        Idle,
-        Moving
+        Closed
     }
 }

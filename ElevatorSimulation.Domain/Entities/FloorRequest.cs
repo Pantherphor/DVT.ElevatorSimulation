@@ -11,7 +11,7 @@
             this.passengerCount = excessPassengers;
         }
 
-        public int Floor => targetFloor;
+        public int TargetFloor => targetFloor;
         public int PassengerCount => passengerCount;
     }
 }
