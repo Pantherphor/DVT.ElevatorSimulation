@@ -2,6 +2,9 @@
 {
     public enum enElevatorDoorState
     {
-        Closed
+        Closed,
+        Openning,
+        Opened,
+        Closing
     }
 }

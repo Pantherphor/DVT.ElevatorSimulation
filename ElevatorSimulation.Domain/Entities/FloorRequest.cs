@@ -4,14 +4,18 @@
     {
         private readonly int targetFloor;
         private readonly int passengerCount;
+        private readonly int callingFloor;
 
-        public FloorRequest(int targetFloor, int passengers)
+        public FloorRequest(int targetFloor, int passengerCount)
         {
             this.targetFloor = targetFloor;
-            this.passengerCount = passengers;
+            this.passengerCount = passengerCount;
+            //this.callingFloor = callingFloor;
         }
 
         public int TargetFloor => targetFloor;
         public int PassengerCount => passengerCount;
+
+        public int CallingFloor => callingFloor;
     }
 }

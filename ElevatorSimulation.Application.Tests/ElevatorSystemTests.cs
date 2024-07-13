@@ -4,6 +4,7 @@ using System.Linq;
 using ElevatorSimulation.Domain.Entities;
 using ElevatorSimulation.Domain.Enums;
 using ElevatorSimulation.Domain.Interfaces;
+using ElevatorSimulation.Domain.Services;
 using ElevatorSimulation.Services;
 using Moq;
 using Xunit;
@@ -12,8 +13,8 @@ namespace ElevatorSimulation.Application.Tests
 {
     public class ElevatorSystemTests
     {
-        private ElevatorSystem _elevatorSystem;
-        private List<Mock<IElevator>> _mockElevators;
+        private readonly ElevatorSystem _elevatorSystem;
+        private readonly List<Mock<IElevator>> _mockElevators;
 
         public ElevatorSystemTests()
         {
@@ -32,6 +33,7 @@ namespace ElevatorSimulation.Application.Tests
                 mockElevator.Object.CurrentFloor = 0;
                 mockElevator.Object.PassengerCount = 0;
                 mockElevator.Object.Id = i + 1;
+                mockElevator.Setup(o => o.ElevatorMover).Returns(new ElevatorMover());
                 _mockElevators.Add(mockElevator);
             }
 
@@ -62,8 +64,8 @@ namespace ElevatorSimulation.Application.Tests
             _elevatorSystem.SetOverloadStrategy(overloadStrategyMock.Object);
 
             var request = new FloorRequest(5,10);
-            _mockElevators[0].Setup(e => e.IsFull()).Returns(true);
-            _mockElevators[0].Setup(e => e.GetExcessPassangers()).Returns(5);
+            _mockElevators[0].Setup(e => e.IsFull(request.PassengerCount)).Returns(true);
+            _mockElevators[0].Setup(e => e.GetExcessPassangers(request.PassengerCount)).Returns(5);
 
             // Act
             _elevatorSystem.CallElevator(request);
@@ -74,7 +76,7 @@ namespace ElevatorSimulation.Application.Tests
         }
 
         [Fact]
-        public void MoveElevator_ShouldAddMoveRequest()
+        public void MoveElevator_Should_Call_MoveToNextFloorAsync()
         {
             // Arrange
             int elevatorId = 1;
@@ -84,9 +86,8 @@ namespace ElevatorSimulation.Application.Tests
             _elevatorSystem.MoveElevator(elevatorId, targetFloor);
 
             // Assert
-            var elevator = _mockElevators.First(e => e.Object.Id == elevatorId).Object;
-            Assert.Single(elevator.FloorRequests);
-            Assert.Equal(targetFloor, elevator.FloorRequests.First().TargetFloor);
+            var elevatorMock = _mockElevators.First(e => e.Object.Id == elevatorId);
+            elevatorMock.Verify(o => o.MoveToNextFloorAsync(), Times.Once);
         }
 
         [Fact]

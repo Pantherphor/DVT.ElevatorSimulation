@@ -1,4 +1,5 @@
 ﻿using ElevatorSimulation.Domain.Interfaces;
+using ElevatorSimulation.Domain.Services;
 using System.Collections.Generic;
 
 namespace ElevatorSimulation.Domain.Entities
@@ -17,7 +18,7 @@ namespace ElevatorSimulation.Domain.Entities
 
             for (int i = 0; i < elevatorCount; i++)
             {
-                Elevators.Add(new Elevator());
+                Elevators.Add(new Elevator(new ElevatorMover()));
             }
         }
     }

@@ -1,7 +1,7 @@
 ﻿using ElevatorSimulation.Domain.Enums;
 using ElevatorSimulation.Domain.Interfaces;
+using ElevatorSimulation.Domain.Services;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace ElevatorSimulation.Domain.Entities
@@ -13,20 +13,24 @@ namespace ElevatorSimulation.Domain.Entities
         public int PassengerCount { get; set; }
         public bool IsMoving { get; set; }
         public int MaxPassengerLimit { get; set; }
+        public IList<FloorRequest> FloorRequests { get; }
 
         public enElevatorDoorState DoorState { get; private set; }
         public enElevatorDirection Direction { get; set; }
 
+        private readonly IElevatorMover elevatorMover;
 
-        public IList<FloorRequest> FloorRequests { get; }
-
-        public Elevator()
+        public Elevator(IElevatorMover elevatorMover)
         {
             CurrentFloor = 0;
             FloorRequests = new List<FloorRequest>();
             DoorState = enElevatorDoorState.Closed;
             Direction = enElevatorDirection.None;
+
+            this.elevatorMover = elevatorMover.Initialize(this);
         }
+
+        public IElevatorMover ElevatorMover => this.elevatorMover;
 
 
         public void AddFloorRequest(FloorRequest targetFloor)
@@ -36,59 +40,10 @@ namespace ElevatorSimulation.Domain.Entities
 
         public async Task MoveToNextFloorAsync()
         {
-            if (FloorRequests.Any())
-            {
-                var floorRequest = FloorRequests.FirstOrDefault();
-                PassengerCount = floorRequest.PassengerCount;
-                int targetFloor = floorRequest.TargetFloor;
-                if (!IsMoving && CurrentFloor != targetFloor)
-                {
-                    Direction = targetFloor > CurrentFloor ? enElevatorDirection.Up : enElevatorDirection.Down;
-                    IsMoving = true;
-
-                    int step = Direction == enElevatorDirection.Up ? 1 : -1;
-                    while (CurrentFloor != targetFloor)
-                    {
-                        await Task.Delay(1000); // Simulate time to move one floor
-                        CurrentFloor += step;
-                        if (CurrentFloor != targetFloor)
-                        {
-                            await HandlePassengersAtCurrentFloor();
-                        }
-                    }
-
-                    IsMoving = false;
-                }
-            }
-            
+            await elevatorMover.MoveToNextFloorAsync();  
         }
 
-        private async Task HandlePassengersAtCurrentFloor()
-        {
-            var offloadingRequests = FloorRequests.Where(r => r.TargetFloor == CurrentFloor).ToList();
-
-            foreach (var request in offloadingRequests)
-            {
-                await OffloadPassengers(request);
-            }
-        }
-
-        private async Task OffloadPassengers(FloorRequest floorRequest)
-        {
-            await Task.Delay(2000); // Simulate door opened time while offloading
-
-            if (CurrentFloor == floorRequest.TargetFloor)
-            {
-                PassengerCount -= floorRequest.PassengerCount;
-                RemoveFloorRequest(floorRequest);
-                if (PassengerCount < 0)
-                {
-                    PassengerCount = 0;
-                }
-            }
-        }
-
-        private void RemoveFloorRequest(FloorRequest floorRequest)
+        public void RemoveFloorRequest(FloorRequest floorRequest)
         {
             FloorRequests.Remove(floorRequest);
         }
@@ -105,14 +60,14 @@ namespace ElevatorSimulation.Domain.Entities
             };
         }
 
-        public bool IsFull()
+        public bool IsFull(int passangerCount)
         {
-            return PassengerCount > MaxPassengerLimit;
+            return (PassengerCount + passangerCount) > MaxPassengerLimit;
         }
 
-        public int GetExcessPassangers()
+        public int GetExcessPassangers(int passangerCount)
         {
-            return PassengerCount - MaxPassengerLimit;
+            return (PassengerCount + passangerCount) - MaxPassengerLimit;
         }
     }
 }

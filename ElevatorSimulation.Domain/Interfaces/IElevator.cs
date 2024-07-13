@@ -1,32 +1,22 @@
-﻿using ElevatorSimulation.Domain.Entities;
-using ElevatorSimulation.Domain.Enums;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+﻿using ElevatorSimulation.Domain.Enums;
+using ElevatorSimulation.Domain.Services;
 
 namespace ElevatorSimulation.Domain.Interfaces
 {
-
-    public interface IElevatorOparations
-    {
-        IList<FloorRequest> FloorRequests { get; }
-
-        void AddFloorRequest(FloorRequest targetFloor);
-        Task MoveToNextFloorAsync();
-        ElevatorStatus GetElevatorStatus();
-    }
-
     public interface IElevator : IElevatorOparations
     {
         int Id { get; set; }
         int CurrentFloor { get; set; }
-        bool IsMoving { get; }
+        bool IsMoving { get; set; }
         int PassengerCount { get; set; }
         int MaxPassengerLimit { get; }
 
         enElevatorDirection Direction { get; set; }
         enElevatorDoorState DoorState { get; }
 
-        bool IsFull();
-        int GetExcessPassangers();
+        IElevatorMover ElevatorMover { get; }
+
+        bool IsFull(int passengerCount);
+        int GetExcessPassangers(int passengerCount);
     }
 }

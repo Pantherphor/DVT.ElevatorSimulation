@@ -1,5 +1,9 @@
 using ElevatorSimulation.Domain.Entities;
 using ElevatorSimulation.Domain.Enums;
+using ElevatorSimulation.Domain.Interfaces;
+using ElevatorSimulation.Domain.Services;
+using Moq;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace ElevatorSimulation.Domain.Tests
@@ -10,7 +14,8 @@ namespace ElevatorSimulation.Domain.Tests
         public void Elevator_Should_Initialize_With_Correct_Values()
         {
             //arrange
-            var elevator = new Elevator();
+            var mockElevatorMover = new Mock<IElevatorMover>();
+            var elevator = new Elevator(mockElevatorMover.Object);
 
             //assert
             Assert.Equal(0, elevator.CurrentFloor);
@@ -21,7 +26,8 @@ namespace ElevatorSimulation.Domain.Tests
         public void AddTargetFloor_Should_Add_Target_Floor_To_Queue()
         {
             //arrange
-            var elevator = new Elevator();
+            var mockElevatorMover = new Mock<IElevatorMover>();
+            var elevator = new Elevator(mockElevatorMover.Object);
             
             //action
             elevator.AddFloorRequest(new FloorRequest(5, 2));
@@ -33,13 +39,14 @@ namespace ElevatorSimulation.Domain.Tests
         }
         
         [Fact]
-        public void MoveToNextFloor_Should_Move_Elevator_To_Next_Floor_No_Request_Should_Not_Fail()
+        public async void MoveToNextFloor_Should_Move_Elevator_To_Next_Floor_No_Request_Should_Not_Fail()
         {
             //arrange
-            var elevator = new Elevator();
+            var mockElevatorMover = new Mock<IElevatorMover>();
+            var elevator = new Elevator(mockElevatorMover.Object);
 
             //action
-            elevator.MoveToNextFloorAsync();
+            await elevator.MoveToNextFloorAsync();
 
             //assert
             Assert.Equal(0, elevator.CurrentFloor);
@@ -50,7 +57,8 @@ namespace ElevatorSimulation.Domain.Tests
         public void MoveToNextFloor_Should_Not_Move_Elevator_To_Next_Floor()
         {
             //arrange
-            var elevator = new Elevator();
+            var mockElevatorMover = new Mock<IElevatorMover>();
+            var elevator = new Elevator(mockElevatorMover.Object);
 
             //action
             elevator.AddFloorRequest(new FloorRequest(5, 2));
@@ -61,22 +69,26 @@ namespace ElevatorSimulation.Domain.Tests
         }
 
         [Fact]
-        public async void MoveToNextFloor_Should_Move_Elevator_To_Next_Floor_First_Request_Floor()
+        public async void MoveToNextFloor_Should_Call_Move_Elevator_To_Next_Floor()
         {
             //arrange
-            var elevator = new Elevator();
+            var mockElevatorMover = new Mock<IElevatorMover>();
+            mockElevatorMover.Setup(o => o.Initialize(It.IsAny<IElevator>()))
+                     .Returns(mockElevatorMover.Object);
+            mockElevatorMover.Setup(o => o.MoveToNextFloorAsync())
+                .Returns(Task.CompletedTask);
+
+            var elevator = new Elevator(mockElevatorMover.Object);
             elevator.AddFloorRequest(new FloorRequest(5, 2));
             elevator.AddFloorRequest(new FloorRequest(3, 3));
             elevator.AddFloorRequest(new FloorRequest(8, 4));
 
             //action
-            await elevator.MoveToNextFloorAsync();
+            await elevator.MoveToNextFloorAsync(); //TODO: move this method into it own object to test better and clean code as more is expected to happen here
 
             //assert
-            Assert.Equal(5, elevator.CurrentFloor);
-            Assert.Equal(2, elevator.FloorRequests.Count);
-            Assert.Equal(0, elevator.PassengerCount);
-            Assert.Equal(enElevatorDoorState.Closed, elevator.DoorState);
+            mockElevatorMover.Verify(o => o.Initialize(elevator), Times.Once);
+            mockElevatorMover.Verify(o => o.MoveToNextFloorAsync(), Times.Once);
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using ElevatorSimulation.Application.Strategies;
 using ElevatorSimulation.Domain.Entities;
 using ElevatorSimulation.Domain.Interfaces;
+using ElevatorSimulation.Domain.Services;
 using Moq;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,10 +16,11 @@ namespace ElevatorSimulation.Application.Tests
         {
             // Arrange
             var mockElevatorSystem = new Mock<IElevatorSystem>();
+            var mockElevatorMover = new Mock<IElevatorMover>();
             var elevators = new List<IElevator>
             {
-                new Elevator { Id = 1, CurrentFloor = 0, PassengerCount = 8, MaxPassengerLimit = 10 },
-                new Elevator { Id = 2, CurrentFloor = 0, PassengerCount = 2, MaxPassengerLimit = 10 }
+                new Elevator(mockElevatorMover.Object) { Id = 1, CurrentFloor = 0, PassengerCount = 8, MaxPassengerLimit = 10 },
+                new Elevator(mockElevatorMover.Object) { Id = 2, CurrentFloor = 0, PassengerCount = 2, MaxPassengerLimit = 10 }
             };
 
             mockElevatorSystem.Setup(es => es.Elevators).Returns(elevators);
@@ -42,10 +44,11 @@ namespace ElevatorSimulation.Application.Tests
         {
             // Arrange
             var mockElevatorSystem = new Mock<IElevatorSystem>();
+            var mockElevatorMover = new Mock<IElevatorMover>();
             var elevators = new List<IElevator>
             {
-                new Elevator { Id = 1, CurrentFloor = 0, PassengerCount = 10, MaxPassengerLimit = 10 },
-                new Elevator { Id = 2, CurrentFloor = 0, PassengerCount = 10, MaxPassengerLimit = 10 }
+                new Elevator(mockElevatorMover.Object) { Id = 1, CurrentFloor = 0, PassengerCount = 10, MaxPassengerLimit = 10 },
+                new Elevator(mockElevatorMover.Object) { Id = 2, CurrentFloor = 0, PassengerCount = 10, MaxPassengerLimit = 10 }
             };
 
             mockElevatorSystem.Setup(es => es.Elevators).Returns(elevators);
