@@ -43,6 +43,8 @@ namespace ElevatorSimulation.Domain.Tests
         {
             //arrange
             var mockElevatorMover = new Mock<IElevatorMover>();
+            mockElevatorMover.Setup(o => o.Initialize(It.IsAny<IElevator>()))
+                     .Returns(mockElevatorMover.Object);
             var elevator = new Elevator(mockElevatorMover.Object);
 
             //action

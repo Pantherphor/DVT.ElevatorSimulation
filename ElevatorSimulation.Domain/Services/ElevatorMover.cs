@@ -31,14 +31,17 @@ namespace ElevatorSimulation.Domain.Services
 
         public async Task MoveToNextFloorAsync()
         {
-            var floorRequest = elevator.FloorRequests.FirstOrDefault();
-            elevator.RemoveFloorRequest(floorRequest);
-
-            if (floorRequest != null)
+            while (elevator.FloorRequests.Any())
             {
+                var floorRequest = elevator.FloorRequests.FirstOrDefault();
+                if (floorRequest == null) break;
+
+                elevator.RemoveFloorRequest(floorRequest);
+
                 elevator.PassengerCount = floorRequest.PassengerCount;
                 int callingFloor = floorRequest.CallingFloor;
                 int targetFloor = floorRequest.TargetFloor;
+
                 if (!elevator.IsMoving && elevator.CurrentFloor != targetFloor)
                 {
                     elevator.Direction = targetFloor > elevator.CurrentFloor ? enElevatorDirection.Up : enElevatorDirection.Down;
@@ -59,8 +62,6 @@ namespace ElevatorSimulation.Domain.Services
                     elevator.IsMoving = false;
                     OnElevatorStatusChanged(callingFloor, targetFloor);
                     await OpenAndCloseDoorAsync(floorRequest);
-                    elevator.RemoveFloorRequest(floorRequest);
-                    await MoveToNextFloorAsync();
                 }
             }
         }
