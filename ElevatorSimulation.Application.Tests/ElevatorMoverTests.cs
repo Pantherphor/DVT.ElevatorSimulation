@@ -21,7 +21,7 @@ namespace ElevatorSimulation.Application.Tests
                 PassengerCount = 8,
                 MaxPassengerLimit = 10
             };
-            elevator.AddFloorRequest(new FloorRequest(5, 3));
+            elevator.AddFloorRequest(new FloorRequest(0, 5, 3));
             mover.Initialize(elevator);
 
             // Act
@@ -45,7 +45,7 @@ namespace ElevatorSimulation.Application.Tests
                 PassengerCount = 3,
                 MaxPassengerLimit = 10
             };
-            var floorRequest = new FloorRequest(5, 2);
+            var floorRequest = new FloorRequest(0, 5, 2);
 
             // Act
             await mover.OpenAndCloseDoorAsync(floorRequest);
@@ -68,7 +68,7 @@ namespace ElevatorSimulation.Application.Tests
                 PassengerCount = 3,
                 MaxPassengerLimit = 10
             };
-            var floorRequest = new FloorRequest(5, 5);
+            var floorRequest = new FloorRequest(0, 5, 5);
 
             // Act
             await mover.OffLoadPassengersAsync(floorRequest);
@@ -89,7 +89,7 @@ namespace ElevatorSimulation.Application.Tests
                 PassengerCount = 8,
                 MaxPassengerLimit = 10
             };
-            var floorRequest = new FloorRequest(targetFloor: 5, passengerCount: 5);
+            var floorRequest = new FloorRequest(0, targetFloor: 5, passengerCount: 5);
 
             // Mock the event handler
             var mockEventHandler = new Mock<Action<int, int, int, int>>();

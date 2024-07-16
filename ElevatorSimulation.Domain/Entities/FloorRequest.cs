@@ -6,11 +6,11 @@
         private readonly int passengerCount;
         private readonly int callingFloor;
 
-        public FloorRequest(int targetFloor, int passengerCount)
+        public FloorRequest(int callingFloor, int targetFloor, int passengerCount)
         {
             this.targetFloor = targetFloor;
             this.passengerCount = passengerCount;
-            //this.callingFloor = callingFloor;
+            this.callingFloor = callingFloor;
         }
 
         public int TargetFloor => targetFloor;

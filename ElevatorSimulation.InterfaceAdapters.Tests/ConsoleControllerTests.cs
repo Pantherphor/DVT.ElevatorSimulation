@@ -43,7 +43,7 @@ namespace ElevatorSimulation.InterfaceAdapters.Tests
         public void CallElevator_Should_CallElevator_With_Valid_Input()
         {
             // Arrange
-            var input = new StringReader("1\n3\n2\nq\n");
+            var input = new StringReader("1\n0\n3\n2\nq\n");
             var output = new StringWriter();
 
             Console.SetIn(input);
@@ -73,13 +73,13 @@ namespace ElevatorSimulation.InterfaceAdapters.Tests
 
             // Assert
             Assert.Contains("Invalid floor number.", sw.ToString());
-            mockElevatorSystem.Verify(es => es.CallElevator(new FloorRequest(It.IsAny<int>(), It.IsAny<int>())), Times.Never);
+            mockElevatorSystem.Verify(es => es.CallElevator(new FloorRequest(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<int>())), Times.Never);
         }
 
         [Fact]
         public void CallElevator_Should_Show_Error_On_Invalid_Passenger_Input()
         {
-            using var sr = new StringReader("5\ninvalid");
+            using var sr = new StringReader("0\n5\ninvalid");
             using var sw = new StringWriter();
             Console.SetIn(sr);
             Console.SetOut(sw);
@@ -89,13 +89,13 @@ namespace ElevatorSimulation.InterfaceAdapters.Tests
 
             // Assert
             Assert.Contains("Invalid number of passengers.", sw.ToString());
-            mockElevatorSystem.Verify(es => es.CallElevator(new FloorRequest(It.IsAny<int>(), It.IsAny<int>())), Times.Never);
+            mockElevatorSystem.Verify(es => es.CallElevator(new FloorRequest(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<int>())), Times.Never);
         }
 
         [Fact]
         public void MoveElevator_Should_MoveElevator_With_Valid_Input()
         {
-            using var sr = new StringReader("1\r\n5");
+            using var sr = new StringReader("1\r\n5\n5");
             Console.SetIn(sr);
 
             // Act

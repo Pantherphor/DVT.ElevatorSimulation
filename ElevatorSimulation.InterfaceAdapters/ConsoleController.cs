@@ -53,17 +53,21 @@ namespace ElevatorSimulation.InterfaceAdapters
 
         internal void CallElevator()
         {
-            Console.Write("Enter the floor number: ");
-            if (int.TryParse(Console.ReadLine(), out int floor))
+            Console.Write("Enter the floor number you currently on: ");
+            if (int.TryParse(Console.ReadLine(), out int callingFloor))
             {
-                Console.Write("Enter the number of passengers: ");
-                if (int.TryParse(Console.ReadLine(), out int passengers))
+                Console.Write("Enter the floor number to take you: ");
+                if (int.TryParse(Console.ReadLine(), out int targetFloor))
                 {
-                    elevatorSystem.CallElevator(new FloorRequest(floor, passengers));
-                }
-                else
-                {
-                    Console.WriteLine("Invalid number of passengers.");
+                    Console.Write("Enter the number of passengers: ");
+                    if (int.TryParse(Console.ReadLine(), out int passengers))
+                    {
+                        elevatorSystem.CallElevator(new FloorRequest(callingFloor, targetFloor, passengers));
+                    }
+                    else
+                    {
+                        Console.WriteLine("Invalid number of passengers.");
+                    }
                 }
             }
             else

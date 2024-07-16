@@ -18,7 +18,7 @@ namespace ElevatorSimulation.Application.Tests
             var useCase = new ElevatorControlUseCase(building);
 
             //action
-            useCase.AddTargetFloor(new FloorRequest(targetFloor, 2), elevetorId);
+            useCase.AddTargetFloor(new FloorRequest(0, targetFloor, 2), elevetorId);
 
             //assert
             Assert.False(building.Elevators[elevetorId].IsMoving);
@@ -35,7 +35,7 @@ namespace ElevatorSimulation.Application.Tests
             var useCase = new ElevatorControlUseCase(building);
 
             //action
-            useCase.AddTargetFloor(new FloorRequest(targetFloor, 2), elevatorId);
+            useCase.AddTargetFloor(new FloorRequest(0, targetFloor, 2), elevatorId);
             await useCase.MoveElevatorsAsync();
 
             await Task.Delay(15500); // Wait for the elevator to process

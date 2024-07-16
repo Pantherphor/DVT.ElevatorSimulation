@@ -30,7 +30,7 @@ namespace ElevatorSimulation.Domain.Tests
             var elevator = new Elevator(mockElevatorMover.Object);
             
             //action
-            elevator.AddFloorRequest(new FloorRequest(5, 2));
+            elevator.AddFloorRequest(new FloorRequest(0, 5, 2));
 
             //assert
             Assert.Equal(0, elevator.CurrentFloor);
@@ -63,7 +63,7 @@ namespace ElevatorSimulation.Domain.Tests
             var elevator = new Elevator(mockElevatorMover.Object);
 
             //action
-            elevator.AddFloorRequest(new FloorRequest(5, 2));
+            elevator.AddFloorRequest(new FloorRequest(0, 5, 2));
 
             //assert
             Assert.False(elevator.IsMoving);
@@ -81,9 +81,9 @@ namespace ElevatorSimulation.Domain.Tests
                 .Returns(Task.CompletedTask);
 
             var elevator = new Elevator(mockElevatorMover.Object);
-            elevator.AddFloorRequest(new FloorRequest(5, 2));
-            elevator.AddFloorRequest(new FloorRequest(3, 3));
-            elevator.AddFloorRequest(new FloorRequest(8, 4));
+            elevator.AddFloorRequest(new FloorRequest(0, 5, 2));
+            elevator.AddFloorRequest(new FloorRequest(0, 3, 3));
+            elevator.AddFloorRequest(new FloorRequest(0, 8, 4));
 
             //action
             await elevator.MoveToNextFloorAsync(); //TODO: move this method into it own object to test better and clean code as more is expected to happen here
