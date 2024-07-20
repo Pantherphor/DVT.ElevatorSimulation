@@ -1,5 +1,5 @@
-﻿using ElevatorSimulation.Domain.Entities;
-using ElevatorSimulation.Domain.Interfaces;
+﻿using ElevatorSimulation.Application.UseCases;
+using ElevatorSimulation.Domain.Entities;
 using System;
 using System.Runtime.CompilerServices;
 
@@ -8,11 +8,11 @@ namespace ElevatorSimulation.InterfaceAdapters
 {
     public class ConsoleController
     {
-        private readonly IElevatorSystem elevatorSystem;
+        private readonly IElevatorControlUseCase elevatorControlUseCase;
 
-        public ConsoleController(IElevatorSystem elevatorSystem)
+        public ConsoleController(IElevatorControlUseCase elevatorControlUseCase)
         {
-            this.elevatorSystem = elevatorSystem;
+            this.elevatorControlUseCase = elevatorControlUseCase;
         }
 
         public void Run()
@@ -62,7 +62,7 @@ namespace ElevatorSimulation.InterfaceAdapters
                     Console.Write("Enter the number of passengers: ");
                     if (int.TryParse(Console.ReadLine(), out int passengers))
                     {
-                        elevatorSystem.CallElevator(new FloorRequest(callingFloor, targetFloor, passengers));
+                        elevatorControlUseCase.CallElevator(new FloorRequest(callingFloor, targetFloor, passengers));
                     }
                     else
                     {
@@ -84,7 +84,7 @@ namespace ElevatorSimulation.InterfaceAdapters
                 Console.Write("Enter the floor number to move to: ");
                 if (int.TryParse(Console.ReadLine(), out int floor))
                 {
-                    elevatorSystem.MoveElevator(elevatorId, floor);
+                    elevatorControlUseCase.MoveElevator(elevatorId, floor);
                 }
                 else
                 {
@@ -99,7 +99,7 @@ namespace ElevatorSimulation.InterfaceAdapters
 
         internal void ShowElevatorStatus()
         {
-            var statuses = elevatorSystem.GetElevatorStatus();
+            var statuses = elevatorControlUseCase.GetElevatorStatus();
             foreach (var status in statuses)
             {
                 Console.WriteLine($"Elevator {status.Id}: Floor {status.CurrentFloor}, Direction {status.Direction}, " +

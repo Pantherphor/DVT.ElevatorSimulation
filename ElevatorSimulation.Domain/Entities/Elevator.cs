@@ -8,9 +8,13 @@ namespace ElevatorSimulation.Domain.Entities
 {
     public class Elevator : IElevator
     {
-        public int CurrentFloor { get; set; }
         public int Id { get; set; }
-        public int PassengerCount { get; set; }
+        public int CurrentFloor { get; internal set; }
+        public int PassengerCount { get; internal set; }
+
+        //TODO: remove this from here and should only exist in the FloorRequest
+        public int CallingFloor { get; set; }
+
         public bool IsMoving { get; set; }
         public int MaxPassengerLimit { get; set; }
         public IList<FloorRequest> FloorRequests { get; }
@@ -23,6 +27,7 @@ namespace ElevatorSimulation.Domain.Entities
         public Elevator(IElevatorMover elevatorMover)
         {
             CurrentFloor = 0;
+            PassengerCount = 0;
             FloorRequests = new List<FloorRequest>();
             DoorState = enElevatorDoorState.Closed;
             Direction = enElevatorDirection.None;
@@ -68,6 +73,26 @@ namespace ElevatorSimulation.Domain.Entities
         public int GetExcessPassangers(int passangerCount)
         {
             return (PassengerCount + passangerCount) - MaxPassengerLimit;
+        }
+
+        public int IncrementCurrentFloor(int step)
+        {
+            return CurrentFloor += step;
+        }
+
+        public void DecrementPassengerCount(int passengerCount)
+        {
+            PassengerCount -= passengerCount;
+        }
+
+        public void IncrementPassengerCount(int passengerCount)
+        {
+            PassengerCount += passengerCount;
+        }
+
+        public void ResetPassengerCount()
+        {
+            PassengerCount = 0;
         }
     }
 }

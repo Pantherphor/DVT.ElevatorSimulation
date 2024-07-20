@@ -10,5 +10,6 @@ namespace ElevatorSimulation.Domain.Entities
         public enElevatorDirection Direction { get; set; }
         public bool IsMoving { get; set; }
         public int PassengerCount { get; set; }
+        public int CallingFloor { get; set; }
     }
 }

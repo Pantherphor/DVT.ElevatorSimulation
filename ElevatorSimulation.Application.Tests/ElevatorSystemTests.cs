@@ -36,9 +36,9 @@ namespace ElevatorSimulation.Application.Tests
             elevator2Requests = new List<FloorRequest>();
 
             mockElevator1 = new Mock<IElevator>();
-            mockElevator1.SetupProperty(e => e.CurrentFloor, 1);
-            mockElevator1.SetupProperty(e => e.PassengerCount, 0);
             mockElevator1.SetupProperty(e => e.Direction, enElevatorDirection.None);
+            mockElevator1.Setup(e => e.PassengerCount).Returns(0);
+            mockElevator1.Setup(e => e.CurrentFloor).Returns(1);
             mockElevator1.Setup(e => e.FloorRequests).Returns(elevator1Requests);
             mockElevator1.Setup(e => e.ElevatorMover).Returns(mockElevatorMover1.Object);
             mockElevator1.Setup(e => e.IsFull(It.IsAny<int>())).Returns(false);
@@ -52,9 +52,9 @@ namespace ElevatorSimulation.Application.Tests
             mockElevators.Add(mockElevator1);
 
             mockElevator2 = new Mock<IElevator>();
-            mockElevator2.SetupProperty(e => e.CurrentFloor, 3);
-            mockElevator2.SetupProperty(e => e.PassengerCount, 0);
+            mockElevator2.Setup(e => e.PassengerCount).Returns(0);
             mockElevator2.SetupProperty(e => e.Direction, enElevatorDirection.None);
+            mockElevator2.Setup(e => e.CurrentFloor).Returns(3);
             mockElevator2.Setup(e => e.FloorRequests).Returns(elevator2Requests);
             mockElevator2.Setup(e => e.ElevatorMover).Returns(mockElevatorMover2.Object);
             mockElevator2.Setup(e => e.IsFull(It.IsAny<int>())).Returns(false);
@@ -94,7 +94,7 @@ namespace ElevatorSimulation.Application.Tests
                                     .FirstOrDefault();
             Assert.Single(nearestElevator.Object.FloorRequests);
             Assert.Equal(request.TargetFloor, nearestElevator.Object.FloorRequests.First().TargetFloor);
-            Assert.Equal(request.PassengerCount, nearestElevator.Object.PassengerCount);
+            Assert.NotEqual(request.PassengerCount, nearestElevator.Object.PassengerCount); //No longer equal as this count should only be increased on callingFloor reached
         }
 
         [Fact]
@@ -178,7 +178,7 @@ namespace ElevatorSimulation.Application.Tests
 
             // Assert
             mockElevator1.Verify(e => e.AddFloorRequest(It.Is<FloorRequest>(fr => fr.TargetFloor == request.TargetFloor && fr.PassengerCount == request.PassengerCount)), Times.Once);
-            Assert.Equal(3, mockElevator1.Object.PassengerCount);
+            Assert.NotEqual(3, mockElevator1.Object.PassengerCount); //No longer equal as this count should only be increased on callingFloor reached
         }
     }
 }

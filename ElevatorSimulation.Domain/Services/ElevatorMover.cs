@@ -38,22 +38,25 @@ namespace ElevatorSimulation.Domain.Services
 
                 elevator.RemoveFloorRequest(floorRequest);
 
-                elevator.PassengerCount = floorRequest.PassengerCount;
                 int callingFloor = floorRequest.CallingFloor;
                 int targetFloor = floorRequest.TargetFloor;
 
                 if (!elevator.IsMoving && elevator.CurrentFloor != targetFloor)
                 {
-                    elevator.Direction = targetFloor > elevator.CurrentFloor ? enElevatorDirection.Up : enElevatorDirection.Down;
+                    elevator.Direction = getElevatorDirection(targetFloor);
                     elevator.IsMoving = true;
                     OnElevatorStatusChanged(callingFloor, targetFloor);
 
                     int step = elevator.Direction == enElevatorDirection.Up ? 1 : -1;
-                    while (elevator.CurrentFloor != targetFloor)
+                    while (elevator.CurrentFloor != targetFloor) //TODO: remember we should pickup on calling floor
                     {
                         await Task.Delay(1000); // Simulate time to move one floor
-                        elevator.CurrentFloor += step;
-                        if (elevator.CurrentFloor != targetFloor)
+                        elevator.IncrementCurrentFloor(step);
+                        if (elevator.CurrentFloor == callingFloor)
+                        {
+                            await OpenAndCloseDoorAsync(floorRequest);
+                        }
+                        else
                         {
                             OnElevatorStatusChanged(callingFloor, targetFloor);
                         }
@@ -75,11 +78,19 @@ namespace ElevatorSimulation.Domain.Services
             OnElevatorDoorStatusChanged(enElevatorDoorState.Opened);
 
             await OffLoadPassengersAsync(floorRequest);
+            OnElevatorStatusChanged(floorRequest.CallingFloor, floorRequest.TargetFloor);
             await LoadPassengersAsync(floorRequest);
 
             OnElevatorDoorStatusChanged(enElevatorDoorState.Closing);
             await Task.Delay(2000); // Simulate door close time
             OnElevatorDoorStatusChanged(enElevatorDoorState.Closed);
+
+            elevator.Direction = getElevatorDirection(floorRequest.TargetFloor);
+        }
+
+        private enElevatorDirection getElevatorDirection(int targetFloor)
+        {
+            return targetFloor > elevator.CurrentFloor ? enElevatorDirection.Up : enElevatorDirection.Down;
         }
 
         internal Task OffLoadPassengersAsync(FloorRequest floorRequest)
@@ -87,11 +98,10 @@ namespace ElevatorSimulation.Domain.Services
             // Logic to offload passengers
             if (elevator.CurrentFloor == floorRequest.TargetFloor)
             {
-                elevator.PassengerCount -= floorRequest.PassengerCount;
-                OnElevatorStatusChanged(floorRequest.CallingFloor, floorRequest.TargetFloor);
+                elevator.DecrementPassengerCount(floorRequest.PassengerCount);
                 if (elevator.PassengerCount < 0)
                 {
-                    elevator.PassengerCount = 0;
+                    elevator.ResetPassengerCount();
                 }
             }
             return Task.CompletedTask;
@@ -100,7 +110,7 @@ namespace ElevatorSimulation.Domain.Services
         internal Task LoadPassengersAsync(FloorRequest floorRequest)
         {
             //TODO: we need to check for the next trip in the FloorRequests list
-            if (elevator.CurrentFloor == floorRequest.TargetFloor)
+            if (elevator.CurrentFloor == floorRequest.CallingFloor)
             {
                 if (elevator.IsFull(floorRequest.PassengerCount))
                 {
@@ -109,11 +119,10 @@ namespace ElevatorSimulation.Domain.Services
                 }
                 else
                 {
-                    elevator.PassengerCount += floorRequest.PassengerCount;
+                    elevator.IncrementPassengerCount(floorRequest.PassengerCount);
                     OnElevatorStatusChanged(floorRequest.CallingFloor, floorRequest.TargetFloor);
                 }
             }
-            OnElevatorStatusChanged(floorRequest.CallingFloor, floorRequest.TargetFloor);
             return Task.CompletedTask;
         }
 

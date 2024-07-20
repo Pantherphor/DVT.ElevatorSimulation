@@ -5,4 +5,9 @@
     <TargetFramework>net5.0</TargetFramework>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\ElevatorSimulation.Application\ElevatorSimulation.Application.csproj" />
+    <ProjectReference Include="..\ElevatorSimulation.InterfaceAdapters\ElevatorSimulation.InterfaceAdapters.csproj" />
+  </ItemGroup>
+
 </Project>

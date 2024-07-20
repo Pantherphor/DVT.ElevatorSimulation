@@ -1,37 +1,54 @@
 ﻿using ElevatorSimulation.Domain.Entities;
-using System.Threading.Tasks;
+using ElevatorSimulation.Domain.Interfaces;
+using System.Collections.Generic;
 
 namespace ElevatorSimulation.Application.UseCases
 {
-    public class ElevatorControlUseCase
+    public interface IElevatorControlUseCase
     {
-        private readonly Building _building;
+        void CallElevator(FloorRequest request);
+        void MoveElevator(int elevatorId, int floor);
+        IEnumerable<ElevatorStatus> GetElevatorStatus();
+    }
+
+    public class ElevatorControlUseCase : IElevatorControlUseCase
+    {
+        private readonly Building building;
+        private readonly IElevatorSystem elevatorSystem;
 
         public ElevatorControlUseCase(Building building)
         {
-            _building = building;
+            this.building = building;
+            elevatorSystem = this.building.ElevatorSystem;
         }
 
-        public void AddTargetFloor(FloorRequest floorRequest, int elevatorId)
+        //public void AddTargetFloor(FloorRequest floorRequest, int elevatorId)
+        //{
+        //    var elevator = _building.ElevatorSystem.Elevators.ToList()[elevatorId];
+        //    elevator.AddFloorRequest(floorRequest);
+        //}
+
+        //public async Task MoveElevatorsAsync()
+        //{
+        //    foreach (var elevator in _building.ElevatorSystem.Elevators)
+        //    {
+        //        await elevator.MoveToNextFloorAsync();
+        //    }
+        //}
+
+        public void CallElevator(FloorRequest request)
         {
-            var elevator = _building.Elevators[elevatorId];
-            elevator.AddFloorRequest(floorRequest);
+            elevatorSystem.CallElevator(request);
         }
 
-        public async Task MoveElevatorsAsync()
+        public void MoveElevator(int elevatorId, int floor)
         {
-            foreach (var elevator in _building.Elevators)
-            {
-                await elevator.MoveToNextFloorAsync();
-            }
+            elevatorSystem.MoveElevator(elevatorId, floor);
         }
 
-        public void DisplayElevatorStatuses()
+        public IEnumerable<ElevatorStatus> GetElevatorStatus()
         {
-            foreach (var elevator in _building.Elevators)
-            {
-                elevator.GetElevatorStatus();
-            }
+            return elevatorSystem.GetElevatorStatus();
         }
     }
 }

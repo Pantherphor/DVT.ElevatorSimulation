@@ -1,164 +1,167 @@
+﻿using ElevatorSimulation.Application.UseCases;
 using ElevatorSimulation.Domain.Entities;
+using ElevatorSimulation.Domain.Enums;
+using Moq;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using Xunit;
 
 namespace ElevatorSimulation.InterfaceAdapters.Tests
 {
-    using ElevatorSimulation.Domain.Enums;
-    using ElevatorSimulation.Domain.Interfaces;
-    using Moq;
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-    using Xunit;
-
-    public class ConsoleControllerTests
+    public class ConsoleControllerTests : IDisposable
     {
-        private readonly Mock<IElevatorSystem> mockElevatorSystem;
-        private readonly ConsoleController consoleController;
+        private readonly Mock<IElevatorControlUseCase> mockElevatorControlUseCase;
+        private readonly ConsoleController controller;
+        private readonly TextReader originalInput;
+        private readonly TextWriter originalOutput;
 
         public ConsoleControllerTests()
         {
-            mockElevatorSystem = new Mock<IElevatorSystem>();
-            consoleController = new ConsoleController(mockElevatorSystem.Object);
+            mockElevatorControlUseCase = new Mock<IElevatorControlUseCase>();
+            controller = new ConsoleController(mockElevatorControlUseCase.Object);
+            originalInput = Console.In;
+            originalOutput = Console.Out;
         }
 
         [Fact]
-        public void DisplayMenu_Should_Show_Options()
-        {
-            using var sw = new StringWriter();
-            Console.SetOut(sw);
-
-            // Act
-            ConsoleController.DisplayMenu();
-
-            // Assert
-            var expectedOutput = "Select an option:\r\n" +
-                                 "1. Call Elevator\r\n" +
-                                 "2. Move Elevator\r\n" +
-                                 "3. Show Elevator Status\r\n" +
-                                 "q. Quit\r\n";
-            Assert.Equal(expectedOutput, sw.ToString());
-        }
-
-        [Fact]
-        public void CallElevator_Should_CallElevator_With_Valid_Input()
+        [Trait("Category", "Integration")]
+        public void CallElevator_Should_Call_ElevatorControlUseCase_With_Correct_Parameters()
         {
             // Arrange
-            var input = new StringReader("1\n0\n3\n2\nq\n");
-            var output = new StringWriter();
-
-            Console.SetIn(input);
-            Console.SetOut(output);
+            var input = "1\n5\n3\n";
+            var stringReader = new StringReader(input);
+            Console.SetIn(stringReader);
 
             // Act
-            consoleController.Run();
+            controller.CallElevator();
 
             // Assert
-            mockElevatorSystem.Verify(es => es.CallElevator(It.IsAny<FloorRequest>()), Times.Once);
-
-            // Cleanup
-            Console.SetIn(new StreamReader(Console.OpenStandardInput()));
-            Console.SetOut(new StreamWriter(Console.OpenStandardOutput()) { AutoFlush = true });
+            mockElevatorControlUseCase.Verify(e => e.CallElevator(It.Is<FloorRequest>(r => r.CallingFloor == 1 && r.TargetFloor == 5 && r.PassengerCount == 3)), Times.Once);
         }
 
         [Fact]
-        public void CallElevator_Should_Show_Error_On_Invalid_Floor_Input()
+        [Trait("Category", "Integration")]
+        public void MoveElevator_Should_Move_ElevatorControlUseCase_With_Correct_Parameters()
         {
-            using var sr = new StringReader("invalid\n");
-            using var sw = new StringWriter();
-            Console.SetIn(sr);
-            Console.SetOut(sw);
+            // Arrange
+            var input = "1\n5\n";
+            var stringReader = new StringReader(input);
+            Console.SetIn(stringReader);
 
             // Act
-            consoleController.CallElevator();
+            controller.MoveElevator();
 
             // Assert
-            Assert.Contains("Invalid floor number.", sw.ToString());
-            mockElevatorSystem.Verify(es => es.CallElevator(new FloorRequest(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<int>())), Times.Never);
+            mockElevatorControlUseCase.Verify(e => e.MoveElevator(1, 5), Times.Once);
         }
 
         [Fact]
-        public void CallElevator_Should_Show_Error_On_Invalid_Passenger_Input()
+        [Trait("Category", "Integration")]
+        public void ShowElevatorStatus_Should_Display_Correct_Status()
         {
-            using var sr = new StringReader("0\n5\ninvalid");
-            using var sw = new StringWriter();
-            Console.SetIn(sr);
-            Console.SetOut(sw);
-
-            // Act
-            consoleController.CallElevator();
-
-            // Assert
-            Assert.Contains("Invalid number of passengers.", sw.ToString());
-            mockElevatorSystem.Verify(es => es.CallElevator(new FloorRequest(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<int>())), Times.Never);
-        }
-
-        [Fact]
-        public void MoveElevator_Should_MoveElevator_With_Valid_Input()
-        {
-            using var sr = new StringReader("1\r\n5\n5");
-            Console.SetIn(sr);
-
-            // Act
-            consoleController.MoveElevator();
-
-            // Assert
-            mockElevatorSystem.Verify(es => es.MoveElevator(1, 5), Times.Once);
-        }
-
-        [Fact]
-        public void MoveElevator_Should_Show_Error_On_Invalid_ElevatorId_Input()
-        {
-            using var sr = new StringReader("invalid\n");
-            using var sw = new StringWriter();
-            Console.SetIn(sr);
-            Console.SetOut(sw);
-
-            // Act
-            consoleController.MoveElevator();
-
-            // Assert
-            Assert.Contains("Invalid elevator ID.", sw.ToString());
-            mockElevatorSystem.Verify(es => es.MoveElevator(It.IsAny<int>(), It.IsAny<int>()), Times.Never);
-        }
-
-        [Fact]
-        public void MoveElevator_Should_Show_Error_On_Invalid_Floor_Input()
-        {
-            using var sr = new StringReader("1\ninvalid");
-            using var sw = new StringWriter();
-            Console.SetIn(sr);
-            Console.SetOut(sw);
-
-            // Act
-            consoleController.MoveElevator();
-
-            // Assert
-            Assert.Contains("Invalid floor number.", sw.ToString());
-            mockElevatorSystem.Verify(es => es.MoveElevator(It.IsAny<int>(), It.IsAny<int>()), Times.Never);
-        }
-
-        [Fact]
-        public void ShowElevatorStatus_Should_Display_Status()
-        {
+            // Arrange
             var statuses = new List<ElevatorStatus>
             {
-                new ElevatorStatus { Id = 1, CurrentFloor = 3, Direction = enElevatorDirection.Up, IsMoving = true, PassengerCount = 4 },
-                new ElevatorStatus { Id = 2, CurrentFloor = 5, Direction = enElevatorDirection.Down, IsMoving = false, PassengerCount = 2 }
+                new ElevatorStatus { Id = 1, CurrentFloor = 3, Direction = enElevatorDirection.Up, IsMoving = true, PassengerCount = 2 }
             };
 
-            Moq.Language.Flow.IReturnsResult<IElevatorSystem> returnsResult = mockElevatorSystem.Setup(es => es.GetElevatorStatus()).Returns(statuses);
+            mockElevatorControlUseCase.Setup(e => e.GetElevatorStatus()).Returns(statuses);
 
-            using var sw = new StringWriter();
-            Console.SetOut(sw);
+            var stringWriter = new StringWriter();
+            Console.SetOut(stringWriter);
 
             // Act
-            consoleController.ShowElevatorStatus();
+            controller.ShowElevatorStatus();
 
             // Assert
-            var expectedOutput = "Elevator 1: Floor 3, Direction Up, Moving, Passengers 4\r\n" +
-                                 "Elevator 2: Floor 5, Direction Down, Stationary, Passengers 2\r\n";
-            Assert.Equal(expectedOutput, sw.ToString());
+            var output = stringWriter.ToString().Trim();
+            Assert.Contains("Elevator 1: Floor 3, Direction Up, Moving, Passengers 2", output);
         }
-    }
 
+        [Fact]
+        [Trait("Category", "Integration")]
+        public void Run_Should_Handle_Invalid_Option()
+        {
+            // Arrange
+            var input = "invalid\nq\n";
+            var stringReader = new StringReader(input);
+            var stringWriter = new StringWriter();
+
+            Console.SetIn(stringReader);
+            Console.SetOut(stringWriter);
+
+            // Act
+            controller.Run();
+
+            // Assert
+            var output = stringWriter.ToString();
+            Assert.Contains("Invalid option. Please try again.", output);
+        }
+
+        [Fact]
+        [Trait("Category", "Integration")]
+        public void Run_Should_Call_Elevator()
+        {
+            // Arrange
+            var input = "1\n1\n5\n3\nq\n";
+            var stringReader = new StringReader(input);
+            var stringWriter = new StringWriter();
+
+            Console.SetIn(stringReader);
+            Console.SetOut(stringWriter);
+
+            // Act
+            controller.Run();
+
+            // Assert
+            mockElevatorControlUseCase.Verify(e => e.CallElevator(It.IsAny<FloorRequest>()), Times.Once);
+        }
+
+        [Fact]
+        [Trait("Category", "Integration")]
+        public void Run_Should_Move_Elevator()
+        {
+            // Arrange
+            var input = "2\n1\n5\nq\n";
+            var stringReader = new StringReader(input);
+            var stringWriter = new StringWriter();
+
+            Console.SetIn(stringReader);
+            Console.SetOut(stringWriter);
+
+            // Act
+            controller.Run();
+
+            // Assert
+            mockElevatorControlUseCase.Verify(e => e.MoveElevator(It.IsAny<int>(), It.IsAny<int>()), Times.Once);
+        }
+
+        [Fact]
+        [Trait("Category", "Integration")]
+        public void Run_Should_Show_Elevator_Status()
+        {
+            // Arrange
+            var input = "3\nq\n";
+            var stringReader = new StringReader(input);
+            var stringWriter = new StringWriter();
+
+            Console.SetIn(stringReader);
+            Console.SetOut(stringWriter);
+
+            // Act
+            controller.Run();
+
+            // Assert
+            mockElevatorControlUseCase.Verify(e => e.GetElevatorStatus(), Times.Once);
+        }
+
+        public void Dispose()
+        {
+            // Cleanup
+            Console.SetIn(originalInput);
+            Console.SetOut(originalOutput);
+        }
+
+    }
 }

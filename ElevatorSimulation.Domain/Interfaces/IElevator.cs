@@ -6,10 +6,11 @@ namespace ElevatorSimulation.Domain.Interfaces
     public interface IElevator : IElevatorOparations
     {
         int Id { get; set; }
-        int CurrentFloor { get; set; }
+        int CurrentFloor { get; }
         bool IsMoving { get; set; }
-        int PassengerCount { get; set; }
+        int PassengerCount { get; }
         int MaxPassengerLimit { get; }
+        int CallingFloor { get; }
 
         enElevatorDirection Direction { get; set; }
         enElevatorDoorState DoorState { get; }
@@ -18,5 +19,9 @@ namespace ElevatorSimulation.Domain.Interfaces
 
         bool IsFull(int passengerCount);
         int GetExcessPassangers(int passengerCount);
+        int IncrementCurrentFloor(int step);
+        void DecrementPassengerCount(int passengerCount);
+        void IncrementPassengerCount(int passengerCount);
+        void ResetPassengerCount();
     }
 }

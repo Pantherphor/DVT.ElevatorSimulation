@@ -1,5 +1,8 @@
 using ElevatorSimulation.Application.UseCases;
 using ElevatorSimulation.Domain.Entities;
+using ElevatorSimulation.Domain.Interfaces;
+using Moq;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -11,38 +14,58 @@ namespace ElevatorSimulation.Application.Tests
         [InlineData(0, 5)]
         [InlineData(2, 3)]
         [InlineData(1, 10)]
-        public void AddTargetFloor_Should_Add_Floor_To_Elevator_Should_Not_Move_Elevater(int elevetorId, int targetFloor)
+        public void AddTargetFloor_Should_Add_Floor_To_Elevator_Should_Not_Move_Elevator(int elevatorId, int targetFloor)
         {
-            //arrange
-            var building = new Building(0, 10, 3);
+            // Arrange
+            var mockElevator = new Mock<IElevator>();
+            mockElevator.Setup(e => e.Id).Returns(elevatorId);
+            mockElevator.Setup(e => e.IsMoving).Returns(false);
+            var elevators = new List<IElevator> { mockElevator.Object };
+
+            var mockElevatorSystem = new Mock<IElevatorSystem>();
+            mockElevatorSystem.Setup(es => es.Elevators).Returns(elevators);
+
+            var building = new Building(mockElevatorSystem.Object);
             var useCase = new ElevatorControlUseCase(building);
 
-            //action
-            useCase.AddTargetFloor(new FloorRequest(0, targetFloor, 2), elevetorId);
+            // Act
+            useCase.CallElevator(new FloorRequest(0, targetFloor, 2));
 
-            //assert
-            Assert.False(building.Elevators[elevetorId].IsMoving);
+            // Assert
+            Assert.False(mockElevator.Object.IsMoving);
         }
+
 
         [Theory(Timeout = 66000)]
         [InlineData(0, 5)]
         [InlineData(2, 3)]
         [InlineData(1, 10)]
-        public async Task MoveElevatorsAsync_Should_Move_Elevators_To_Next_Floor(int elevatorId, int targetFloor)
+        public void MoveElevatorsAsync_Should_Move_Elevators_To_Next_Floor(int elevatorId, int targetFloor)
         {
-            //arrange
-            var building = new Building(0, 10, 3);
+            // Arrange
+            var mockElevator = new Mock<IElevator>();
+            mockElevator.Setup(e => e.Id).Returns(elevatorId);
+            mockElevator.Setup(e => e.CurrentFloor).Returns(targetFloor);
+            mockElevator.Setup(e => e.IsMoving).Returns(false);
+            mockElevator.Setup(e => e.MoveToNextFloorAsync()).Returns(Task.CompletedTask);
+            var elevators = new List<IElevator> { mockElevator.Object };
+
+            var mockElevatorSystem = new Mock<IElevatorSystem>();
+            mockElevatorSystem.Setup(es => es.Elevators).Returns(elevators);
+
+            var building = new Building(mockElevatorSystem.Object);
             var useCase = new ElevatorControlUseCase(building);
 
-            //action
-            useCase.AddTargetFloor(new FloorRequest(0, targetFloor, 2), elevatorId);
-            await useCase.MoveElevatorsAsync();
+            // Act
+            useCase.CallElevator(new FloorRequest(0, targetFloor, 2));
+            useCase.MoveElevator(elevatorId, targetFloor);
 
-            await Task.Delay(15500); // Wait for the elevator to process
 
-            //assert
-            Assert.Equal(targetFloor, building.Elevators[elevatorId].CurrentFloor);
+            // Assert
+            var currentElevator = mockElevator.Object;
+            Assert.Equal(elevatorId, currentElevator.Id);
+            Assert.Equal(currentElevator.CurrentFloor, targetFloor);
         }
-
     }
+
 }

@@ -19,7 +19,7 @@ namespace ElevatorSimulation.Application.Strategies
             if (availableElevator != null)
             {
                 int passengersToTransfer = Math.Min(excessPassengers, availableElevator.MaxPassengerLimit - availableElevator.PassengerCount);
-                availableElevator.PassengerCount += passengersToTransfer;
+                availableElevator.IncrementPassengerCount(passengersToTransfer);
                 excessPassengers -= passengersToTransfer;
                 availableElevator.AddFloorRequest(new FloorRequest(callingFloor, targetFloor, passengersToTransfer));
             }
