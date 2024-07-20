@@ -36,7 +36,7 @@ namespace ElevatorSimulation.InterfaceAdapters
                     case "q":
                         return;
                     default:
-                        Console.WriteLine("Invalid option. Please try again.");
+                        Console.WriteLine(ConsoleControllerConstants.InvalidOptionMessage);
                         break;
                 }
             }
@@ -44,56 +44,60 @@ namespace ElevatorSimulation.InterfaceAdapters
 
         internal static void DisplayMenu()
         {
-            Console.WriteLine("Select an option:");
-            Console.WriteLine("1. Call Elevator");
-            Console.WriteLine("2. Move Elevator");
-            Console.WriteLine("3. Show Elevator Status");
-            Console.WriteLine("q. Quit");
+            Console.WriteLine(ConsoleControllerConstants.MenuPrompt);
+            Console.WriteLine(ConsoleControllerConstants.CallElevatorOption);
+            Console.WriteLine(ConsoleControllerConstants.MoveElevatorOption);
+            Console.WriteLine(ConsoleControllerConstants.ShowElevatorStatusOption);
+            Console.WriteLine(ConsoleControllerConstants.QuitOption);
         }
 
         internal void CallElevator()
         {
-            Console.Write("Enter the floor number you currently on: ");
+            Console.Write(ConsoleControllerConstants.EnterFloorNumberMessage);
             if (int.TryParse(Console.ReadLine(), out int callingFloor))
             {
-                Console.Write("Enter the floor number to take you: ");
+                Console.Write(ConsoleControllerConstants.EnterTargetFloorNumberMessage);
                 if (int.TryParse(Console.ReadLine(), out int targetFloor))
                 {
-                    Console.Write("Enter the number of passengers: ");
+                    Console.Write(ConsoleControllerConstants.EnterPassengerCountMessage);
                     if (int.TryParse(Console.ReadLine(), out int passengers))
                     {
                         elevatorControlUseCase.CallElevator(new FloorRequest(callingFloor, targetFloor, passengers));
                     }
                     else
                     {
-                        Console.WriteLine("Invalid number of passengers.");
+                        Console.WriteLine(ConsoleControllerConstants.InvalidPassengerCountMessage);
                     }
+                }
+                else
+                {
+                    Console.WriteLine(ConsoleControllerConstants.InvalidFloorNumberMessage);
                 }
             }
             else
             {
-                Console.WriteLine("Invalid floor number.");
+                Console.WriteLine(ConsoleControllerConstants.InvalidFloorNumberMessage);
             }
         }
 
         internal void MoveElevator()
         {
-            Console.Write("Enter the elevator ID: ");
+            Console.Write(ConsoleControllerConstants.EnterElevatorIdMessage);
             if (int.TryParse(Console.ReadLine(), out int elevatorId))
             {
-                Console.Write("Enter the floor number to move to: ");
+                Console.Write(ConsoleControllerConstants.EnterMoveToFloorNumberMessage);
                 if (int.TryParse(Console.ReadLine(), out int floor))
                 {
                     elevatorControlUseCase.MoveElevator(elevatorId, floor);
                 }
                 else
                 {
-                    Console.WriteLine("Invalid floor number.");
+                    Console.WriteLine(ConsoleControllerConstants.InvalidFloorNumberMessage);
                 }
             }
             else
             {
-                Console.WriteLine("Invalid elevator ID.");
+                Console.WriteLine(ConsoleControllerConstants.InvalidElevatorIdMessage);
             }
         }
 
@@ -102,9 +106,18 @@ namespace ElevatorSimulation.InterfaceAdapters
             var statuses = elevatorControlUseCase.GetElevatorStatus();
             foreach (var status in statuses)
             {
-                Console.WriteLine($"Elevator {status.Id}: Floor {status.CurrentFloor}, Direction {status.Direction}, " +
-                                  $"{(status.IsMoving ? "Moving" : "Stationary")}, Passengers {status.PassengerCount}");
+                Console.WriteLine(
+                    string.Format(
+                        ConsoleControllerConstants.ElevatorStatusMessageFormat,
+                        status.Id,
+                        status.CurrentFloor,
+                        status.Direction,
+                        status.IsMoving ? ConsoleControllerConstants.MovingStatus : ConsoleControllerConstants.StationaryStatus,
+                        status.PassengerCount
+                    )
+                );
             }
         }
     }
+
 }
