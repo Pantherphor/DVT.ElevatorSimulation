@@ -1,4 +1,5 @@
-﻿using ElevatorSimulation.Application.Strategies;
+﻿using ElevatorSimulation.Application.Services;
+using ElevatorSimulation.Application.Strategies;
 using ElevatorSimulation.Domain.Entities;
 using ElevatorSimulation.Domain.Enums;
 using ElevatorSimulation.Domain.Interfaces;
@@ -18,7 +19,6 @@ namespace ElevatorSimulation.Services
             Elevators = elevators;
             this.overloadStrategy = new DefaultOverloadStrategy();
 
-
             foreach (var elevator in Elevators)
             {
                 var mover = elevator.ElevatorMover;
@@ -37,7 +37,6 @@ namespace ElevatorSimulation.Services
                 };
             }
         }
-
 
         private void HandleElevatorStatusChanged(int elevatorId, enElevatorDirection direction, int callingFloor, int currentFloor, int targetFloor, bool isMoving)
         {
@@ -63,32 +62,32 @@ namespace ElevatorSimulation.Services
             {
                 Console.WriteLine($"| {status.Id,8} | {status.CallingFloor,13} | {status.CurrentFloor,13} | {status.TargetFloor,12} | {status.Direction,-9} | {status.PassengerCount,10} | {status.IsMoving,8} |");
             }
-            Console.WriteLine("------------------------------------------------------------------------------------------------");
+            Console.WriteLine(ConsoleConstants.TableSeparator);
         }
 
         private void DisplayTableHeader()
         {
-            Console.WriteLine("------------------------------------------------------------------------------------------------");
-            Console.WriteLine("| Elevator | Calling Floor | Current Floor | Target Floor | Direction | Passengers | IsMoving |");
-            Console.WriteLine("------------------------------------------------------------------------------------------------");
+            Console.WriteLine(ConsoleConstants.TableSeparator);
+            Console.WriteLine(ConsoleConstants.TableHeader);
+            Console.WriteLine(ConsoleConstants.TableSeparator);
         }
 
         private void HandleDoorClosed(int elevatorId, string eventMessage)
         {
-            Console.WriteLine("----------------------------------------------------------------");
-            Console.WriteLine($"| Elevator ID: {elevatorId} | Message: {eventMessage,16} |");
-            Console.WriteLine("----------------------------------------------------------------");
+            Console.WriteLine(ConsoleConstants.DoorClosedHeader);
+            Console.WriteLine($"| {ConsoleConstants.ElevatorIdMessage} {elevatorId} | {ConsoleConstants.EventMessage} {eventMessage,16} |");
+            Console.WriteLine(ConsoleConstants.DoorClosedHeader);
         }
 
         private void HandleElevatorPassangerCountChanged(int elevatorId, int callingFloor, int targetFloor, int excessPassangers)
         {
-            Console.WriteLine("----------------------------------------------------------");
+            Console.WriteLine(ConsoleConstants.PassangerCountHeader);
             Console.WriteLine("| Elevator | Calling Floor | Target Floor | Passengers |");
-            Console.WriteLine("----------------------------------------------------------");
+            Console.WriteLine(ConsoleConstants.PassangerCountHeader);
 
-            Console.WriteLine("----------------------------------------------------------");
+            Console.WriteLine(ConsoleConstants.PassangerCountHeader);
             Console.WriteLine($"| {elevatorId,8} | {callingFloor,13} | {targetFloor,13} | {excessPassangers,8} |");
-            Console.WriteLine("----------------------------------------------------------");
+            Console.WriteLine(ConsoleConstants.PassangerCountHeader);
         }
 
         public IEnumerable<IElevator> Elevators { get; set; }
@@ -105,17 +104,15 @@ namespace ElevatorSimulation.Services
                                     .ThenBy(e => e.PassengerCount)
                                     .ThenBy(e => e.Direction == enElevatorDirection.None ? 0 : 1)
                                     .ThenBy(e => (e.Direction == enElevatorDirection.Up && request.CallingFloor >= e.CurrentFloor) ||
-                                                 (e.Direction == enElevatorDirection.Down && request.CallingFloor <= e.CurrentFloor) ? 0 : 1)
+                                                    (e.Direction == enElevatorDirection.Down && request.CallingFloor <= e.CurrentFloor) ? 0 : 1)
                                     .FirstOrDefault();
 
             if (nearestElevator != null)
             {
                 nearestElevator.AddFloorRequest(new FloorRequest(request.CallingFloor, request.TargetFloor, request.PassengerCount));
-                //nearestElevator.PassengerCount += request.PassengerCount;
 
                 if (nearestElevator.IsFull(request.PassengerCount))
                 {
-                    // Handle overloading by moving excess passengers to another elevator or other logic
                     int excessPassengers = nearestElevator.GetExcessPassangers(request.PassengerCount);
                     overloadStrategy.HandleOverload(this, nearestElevator, request.CallingFloor, request.TargetFloor, excessPassengers);
                 }
@@ -125,9 +122,7 @@ namespace ElevatorSimulation.Services
         public void MoveElevator(int elevatorId, int floor)
         {
             var elevator = Elevators.FirstOrDefault(e => e.Id == elevatorId);
-            elevator?.MoveToNextFloorAsync(); //TODO: need to pass the elevatorId and targetFloor to enable the central controller to override,
-                                              //with this we will later need to have the override strategy that will redirect requests to other
-                                              //elevators available at the time.
+            elevator?.MoveToNextFloorAsync();
         }
 
         public IEnumerable<ElevatorStatus> GetElevatorStatus()
@@ -135,4 +130,5 @@ namespace ElevatorSimulation.Services
             return Elevators.Select(o => o.GetElevatorStatus());
         }
     }
+
 }
