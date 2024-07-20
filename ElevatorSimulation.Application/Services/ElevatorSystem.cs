@@ -116,6 +116,8 @@ namespace ElevatorSimulation.Services
                     int excessPassengers = nearestElevator.GetExcessPassangers(request.PassengerCount);
                     overloadStrategy.HandleOverload(this, nearestElevator, request.CallingFloor, request.TargetFloor, excessPassengers);
                 }
+
+                MoveElevator(nearestElevator.Id, nearestElevator.CallingFloor);
             }
         }
 

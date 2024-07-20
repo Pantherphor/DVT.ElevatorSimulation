@@ -11,14 +11,12 @@ namespace ElevatorSimulation.Domain.Entities
         public int Id { get; set; }
         public int CurrentFloor { get; internal set; }
         public int PassengerCount { get; internal set; }
-
-        //TODO: remove this from here and should only exist in the FloorRequest
-        public int CallingFloor { get; set; }
+        public int CallingFloor { get; internal set; }
 
         public bool IsMoving { get; set; }
         public int MaxPassengerLimit { get; set; }
         public IList<FloorRequest> FloorRequests { get; }
-
+        
         public enElevatorDoorState DoorState { get; private set; }
         public enElevatorDirection Direction { get; set; }
 
@@ -93,6 +91,11 @@ namespace ElevatorSimulation.Domain.Entities
         public void ResetPassengerCount()
         {
             PassengerCount = 0;
+        }
+
+        public void SetCallingFloor(int callingFloor)
+        {
+            CallingFloor = callingFloor;
         }
     }
 }

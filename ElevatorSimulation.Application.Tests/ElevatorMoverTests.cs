@@ -12,10 +12,12 @@ namespace ElevatorSimulation.Application.Tests
     public class ElevatorMoverTests
     {
         private readonly Mock<IElevator> mockElevator;
+        private readonly IElevatorMover elevatorMover;
 
         public ElevatorMoverTests()
         {
             mockElevator = new Mock<IElevator>();
+            elevatorMover = new ElevatorMover().Initialize(mockElevator.Object);
         }
 
         [Fact]
@@ -39,6 +41,161 @@ namespace ElevatorSimulation.Application.Tests
             Assert.Equal(5, elevator.CurrentFloor);
             Assert.Equal(0, elevator.PassengerCount); //Should be 0 as it would have reached and offloaded at destination floor
             Assert.False(elevator.IsMoving);
+        }
+
+        [Fact]
+        [Trait("Category", "Integration")]
+        public async Task MoveToNextFloorAsync_ShouldMoveElevatorToTargetFloor_And_OffloadPassangers_OnAllTagetFloors_GoingUP()
+        {
+            // Arrange
+            var mover = new ElevatorMover();
+            var elevator = new Elevator(mover)
+            {
+                Id = 1,
+                MaxPassengerLimit = 10
+            };
+            elevator.AddFloorRequest(new FloorRequest(0, 5, 3));
+            elevator.AddFloorRequest(new FloorRequest(3, 2, 3));
+            elevator.AddFloorRequest(new FloorRequest(4, 6, 4));
+            mover.Initialize(elevator);
+
+            // Act
+            await mover.MoveToNextFloorAsync();
+
+            // Assert
+            Assert.Equal(6, elevator.CurrentFloor);
+            Assert.Equal(0, elevator.PassengerCount); //Should be 0 as it would have reached and offloaded at destination floor
+            Assert.False(elevator.IsMoving);
+        }
+
+        [Fact]
+        [Trait("Category", "Integration")]
+        public async Task MoveToNextFloorAsync_ShouldMoveElevatorToTargetFloor_And_OffloadPassangers_OnAllTagetFloors_GoingDown()
+        {
+            // Arrange
+            var mover = new ElevatorMover();
+            var elevator = new Elevator(mover)
+            {
+                Id = 1,
+                MaxPassengerLimit = 10
+            };
+            elevator.AddFloorRequest(new FloorRequest(6, 5, 3));
+            elevator.AddFloorRequest(new FloorRequest(2, 0, 3));
+            elevator.AddFloorRequest(new FloorRequest(5, 2, 4));
+            mover.Initialize(elevator);
+
+            // Act
+            await mover.MoveToNextFloorAsync();
+
+            // Assert
+            Assert.Equal(2, elevator.CurrentFloor);
+            Assert.Equal(0, elevator.PassengerCount); //Should be 0 as it would have reached and offloaded at destination floor
+            Assert.False(elevator.IsMoving);
+        }
+
+        [Fact]
+        public async Task MoveToNextFloorAsync_ShouldMoveToCallingFloorAndThenToTargetFloor()
+        {
+            // Arrange
+            var floorRequest = new FloorRequest(2, 5, 3);
+            var floorRequests = new List<FloorRequest> { floorRequest };
+            mockElevator.Setup(e => e.FloorRequests).Returns(floorRequests);
+            mockElevator.Setup(e => e.CurrentFloor).Returns(1);
+            mockElevator.Setup(e => e.RemoveFloorRequest(It.IsAny<FloorRequest>()))
+                .Callback<FloorRequest>(request =>
+                {
+                    mockElevator.Setup(r => r.FloorRequests.Remove(request));
+                });
+            mockElevator.Setup(e => e.IncrementCurrentFloor(It.IsAny<int>()))
+                .Callback<int>(floor =>
+                {
+                    var currentFloor = mockElevator.Object.CurrentFloor;
+                    mockElevator.Setup(e => e.CurrentFloor).Returns(currentFloor + floor);
+                });
+            mockElevator.Setup(e => e.SetCallingFloor(It.IsAny<int>()))
+                .Callback<int>(floor =>
+                {
+                    mockElevator.Setup(e => e.CallingFloor).Returns(floor);
+                });
+
+            // Act
+            await elevatorMover.MoveToNextFloorAsync();
+
+            // Assert
+            mockElevator.Verify(e => e.RemoveFloorRequest(floorRequest), Times.Once);
+            mockElevator.Verify(e => e.IncrementCurrentFloor(It.IsAny<int>()), Times.Exactly(4)); // Move to 2, then 3, 4, 5
+            mockElevator.Verify(e => e.DecrementPassengerCount(floorRequest.PassengerCount), Times.Once);
+            mockElevator.Verify(e => e.IncrementPassengerCount(floorRequest.PassengerCount), Times.Once);
+        }
+
+        [Fact]
+        public async Task MoveToNextFloorAsync_ShouldNotMoveIfAlreadyOnCallingFloor()
+        {
+            // Arrange
+            var floorRequest = new FloorRequest(1, 5, 3);
+            var floorRequests = new List<FloorRequest> { floorRequest };
+            mockElevator.Setup(e => e.FloorRequests).Returns(floorRequests);
+            mockElevator.Setup(e => e.CurrentFloor).Returns(1);
+            mockElevator.Setup(e => e.RemoveFloorRequest(It.IsAny<FloorRequest>()))
+                .Callback<FloorRequest>(request =>
+                {
+                    mockElevator.Setup(r => r.FloorRequests.Remove(request));
+                });
+            mockElevator.Setup(e => e.IncrementCurrentFloor(It.IsAny<int>()))
+                .Callback<int>(floor =>
+                {
+                    var currentFloor = mockElevator.Object.CurrentFloor;
+                    mockElevator.Setup(e => e.CurrentFloor).Returns(currentFloor + floor);
+                });
+            mockElevator.Setup(e => e.SetCallingFloor(It.IsAny<int>()))
+                .Callback<int>(floor =>
+                {
+                    mockElevator.Setup(e => e.CallingFloor).Returns(floor);
+                });
+
+            // Act
+            await elevatorMover.MoveToNextFloorAsync();
+
+            // Assert
+            mockElevator.Verify(e => e.RemoveFloorRequest(floorRequest), Times.Once);
+            mockElevator.Verify(e => e.IncrementCurrentFloor(It.IsAny<int>()), Times.Exactly(4)); // Move to 2, then 3, 4, 5
+            mockElevator.Verify(e => e.DecrementPassengerCount(floorRequest.PassengerCount), Times.Once);
+            mockElevator.Verify(e => e.IncrementPassengerCount(floorRequest.PassengerCount), Times.Never);
+        }
+
+        [Fact]
+        public async Task MoveToNextFloorAsync_ShouldNotMoveIfAlreadyOnTargetFloor()
+        {
+            // Arrange
+            var floorRequest = new FloorRequest(1, 1, 3);
+            var floorRequests = new List<FloorRequest> { floorRequest };
+            mockElevator.Setup(e => e.FloorRequests).Returns(floorRequests);
+            mockElevator.Setup(e => e.CurrentFloor).Returns(1);
+            mockElevator.Setup(e => e.RemoveFloorRequest(It.IsAny<FloorRequest>()))
+                .Callback<FloorRequest>(request =>
+                {
+                    mockElevator.Setup(r => r.FloorRequests.Remove(request));
+                });
+            mockElevator.Setup(e => e.IncrementCurrentFloor(It.IsAny<int>()))
+                .Callback<int>(floor =>
+                {
+                    var currentFloor = mockElevator.Object.CurrentFloor;
+                    mockElevator.Setup(e => e.CurrentFloor).Returns(currentFloor + floor);
+                });
+            mockElevator.Setup(e => e.SetCallingFloor(It.IsAny<int>()))
+                .Callback<int>(floor =>
+                {
+                    mockElevator.Setup(e => e.CallingFloor).Returns(floor);
+                });
+
+            // Act
+            await elevatorMover.MoveToNextFloorAsync();
+
+            // Assert
+            mockElevator.Verify(e => e.RemoveFloorRequest(floorRequest), Times.Once);
+            mockElevator.Verify(e => e.IncrementCurrentFloor(It.IsAny<int>()), Times.Never); // No movement expected
+            mockElevator.Verify(e => e.DecrementPassengerCount(floorRequest.PassengerCount), Times.Never);
+            mockElevator.Verify(e => e.IncrementPassengerCount(floorRequest.PassengerCount), Times.Never);
         }
 
         [Fact]

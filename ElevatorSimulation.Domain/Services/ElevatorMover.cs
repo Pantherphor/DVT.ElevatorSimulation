@@ -39,34 +39,43 @@ namespace ElevatorSimulation.Domain.Services
                 elevator.RemoveFloorRequest(floorRequest);
 
                 int callingFloor = floorRequest.CallingFloor;
-                int targetFloor = floorRequest.TargetFloor;
+                elevator.SetCallingFloor(callingFloor);
 
-                if (!elevator.IsMoving && elevator.CurrentFloor != targetFloor)
+                // Move to the calling floor first
+                if (elevator.CurrentFloor != callingFloor)
                 {
-                    elevator.Direction = getElevatorDirection(targetFloor);
-                    elevator.IsMoving = true;
-                    OnElevatorStatusChanged(callingFloor, targetFloor);
+                    await MoveToFloorAsync(callingFloor);
+                    await OpenAndCloseDoorAsync(floorRequest);
+                }
 
-                    int step = elevator.Direction == enElevatorDirection.Up ? 1 : -1;
-                    while (elevator.CurrentFloor != targetFloor) //TODO: remember we should pickup on calling floor
-                    {
-                        await Task.Delay(1000); // Simulate time to move one floor
-                        elevator.IncrementCurrentFloor(step);
-                        if (elevator.CurrentFloor == callingFloor)
-                        {
-                            await OpenAndCloseDoorAsync(floorRequest);
-                        }
-                        else
-                        {
-                            OnElevatorStatusChanged(callingFloor, targetFloor);
-                        }
-                    }
-
-                    elevator.IsMoving = false;
-                    OnElevatorStatusChanged(callingFloor, targetFloor);
+                int targetFloor = floorRequest.TargetFloor;
+                // Move to the target floor
+                if (elevator.CurrentFloor != targetFloor)
+                {
+                    await MoveToFloorAsync(targetFloor);
                     await OpenAndCloseDoorAsync(floorRequest);
                 }
             }
+        }
+
+        private async Task MoveToFloorAsync(int destinationFloor)
+        {
+            if (elevator.CurrentFloor == destinationFloor) return;
+
+            elevator.Direction = getElevatorDirection(destinationFloor);
+            elevator.IsMoving = true;
+            OnElevatorStatusChanged(elevator.CallingFloor, destinationFloor);
+
+            int step = elevator.Direction == enElevatorDirection.Up ? 1 : -1;
+            while (elevator.CurrentFloor != destinationFloor)
+            {
+                await Task.Delay(1000); // Simulate time to move one floor
+                elevator.IncrementCurrentFloor(step);
+                OnElevatorStatusChanged(elevator.CallingFloor, destinationFloor);
+            }
+
+            elevator.IsMoving = false;
+            OnElevatorStatusChanged(elevator.CallingFloor, destinationFloor);
         }
 
         internal async Task OpenAndCloseDoorAsync(FloorRequest floorRequest)

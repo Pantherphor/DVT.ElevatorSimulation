@@ -21,6 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\ElevatorSimulation.Application\ElevatorSimulation.Application.csproj" />
     <ProjectReference Include="..\ElevatorSimulation.Domain\ElevatorSimulation.Domain.csproj" />
   </ItemGroup>
 
