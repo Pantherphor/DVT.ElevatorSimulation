@@ -24,7 +24,6 @@ namespace ElevatorSimulation.Services
             foreach (var elevator in Elevators)
             {
                 var mover = elevator.ElevatorMover;
-                mover.ElevatorDoorStateChanged += HandleDoorClosed;
                 mover.ElevatorStatusChanged += HandleElevatorStatusChanged;
 
                 elevatorStatuses[elevator.Id] = new ElevatorStatus
@@ -41,7 +40,7 @@ namespace ElevatorSimulation.Services
             }
         }
 
-        private void HandleElevatorStatusChanged(int elevatorId, enElevatorDirection direction, int callingFloor, int currentFloor, int targetFloor, bool isMoving)
+        private void HandleElevatorStatusChanged(int elevatorId, enElevatorDirection direction, int callingFloor, int currentFloor, int targetFloor, bool isMoving, enElevatorDoorState doorState)
         {
             var elevator = Elevators.First(e => e.Id == elevatorId);
             elevatorStatuses[elevatorId] = new ElevatorStatus
@@ -52,7 +51,8 @@ namespace ElevatorSimulation.Services
                 TargetFloor = targetFloor,
                 Direction = direction,
                 PassengerCount = elevator.PassengerCount,
-                IsMoving = isMoving
+                IsMoving = isMoving,
+                DoorState = doorState
             };
 
             elevatorHistory[elevatorId].Add(new ElevatorMovementHistory
@@ -62,6 +62,7 @@ namespace ElevatorSimulation.Services
                 CurrentFloor = currentFloor,
                 TargetFloor = targetFloor,
                 Direction = direction,
+                DoorState = doorState,
                 PassengerCount = elevator.PassengerCount,
                 IsMoving = isMoving,
                 Timestamp = DateTime.Now
@@ -76,13 +77,6 @@ namespace ElevatorSimulation.Services
         public Dictionary<int, IList<ElevatorMovementHistory>> GetElevatorMovementHistory()
         {
             return elevatorHistory;
-        }
-
-        private void HandleDoorClosed(int elevatorId, string eventMessage)
-        {
-            Console.WriteLine(ConsoleConstants.DoorClosedHeader);
-            Console.WriteLine($"| {ConsoleConstants.ElevatorIdMessage} {elevatorId} | {ConsoleConstants.EventMessage} {eventMessage,16} |");
-            Console.WriteLine(ConsoleConstants.DoorClosedHeader);
         }
 
         public IEnumerable<IElevator> Elevators { get; set; }

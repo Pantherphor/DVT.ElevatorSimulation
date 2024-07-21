@@ -19,8 +19,7 @@ namespace ElevatorSimulation.Domain.Services
     {
         private IElevator elevator;
 
-        public event Action<int, string> ElevatorDoorStateChanged;
-        public event Action<int, enElevatorDirection, int, int, int, bool> ElevatorStatusChanged;
+        public event Action<int, enElevatorDirection, int, int, int, bool, enElevatorDoorState> ElevatorStatusChanged;
         public event Action<int, int, int, int> ElevatorPassangerCountChanged; //TODO: try moving this to the elevator class
 
         public IElevatorMover Initialize(IElevator elevator)
@@ -64,35 +63,34 @@ namespace ElevatorSimulation.Domain.Services
 
             elevator.Direction = getElevatorDirection(destinationFloor);
             elevator.IsMoving = true;
-            OnElevatorStatusChanged(elevator.CallingFloor, destinationFloor);
+            OnElevatorStatusChanged(elevator.CallingFloor, destinationFloor, enElevatorDoorState.Closed);
 
             int step = elevator.Direction == enElevatorDirection.Up ? 1 : -1;
             while (elevator.CurrentFloor != destinationFloor)
             {
                 await Task.Delay(1000); // Simulate time to move one floor
                 elevator.IncrementCurrentFloor(step);
-                OnElevatorStatusChanged(elevator.CallingFloor, destinationFloor);
+                OnElevatorStatusChanged(elevator.CallingFloor, destinationFloor, enElevatorDoorState.Closed);
             }
 
             elevator.IsMoving = false;
-            OnElevatorStatusChanged(elevator.CallingFloor, destinationFloor);
+            OnElevatorStatusChanged(elevator.CallingFloor, destinationFloor, enElevatorDoorState.Closed);
         }
 
         internal async Task OpenAndCloseDoorAsync(FloorRequest floorRequest)
         {
             elevator.Direction = enElevatorDirection.None;
 
-            OnElevatorDoorStatusChanged(enElevatorDoorState.Openning);
+            OnElevatorStatusChanged(elevator.CallingFloor, floorRequest.TargetFloor, enElevatorDoorState.Openning);
             await Task.Delay(2000); // Simulate door open time
-            OnElevatorDoorStatusChanged(enElevatorDoorState.Opened);
+            OnElevatorStatusChanged(elevator.CallingFloor, floorRequest.TargetFloor, enElevatorDoorState.Opened);
 
             await OffLoadPassengersAsync(floorRequest);
-            OnElevatorStatusChanged(floorRequest.CallingFloor, floorRequest.TargetFloor);
             await LoadPassengersAsync(floorRequest);
 
-            OnElevatorDoorStatusChanged(enElevatorDoorState.Closing);
+            OnElevatorStatusChanged(elevator.CallingFloor, floorRequest.TargetFloor, enElevatorDoorState.Closing);
             await Task.Delay(2000); // Simulate door close time
-            OnElevatorDoorStatusChanged(enElevatorDoorState.Closed);
+            OnElevatorStatusChanged(elevator.CallingFloor, floorRequest.TargetFloor, enElevatorDoorState.Closed);
 
             elevator.Direction = getElevatorDirection(floorRequest.TargetFloor);
         }
@@ -129,7 +127,7 @@ namespace ElevatorSimulation.Domain.Services
                 else
                 {
                     elevator.IncrementPassengerCount(floorRequest.PassengerCount);
-                    OnElevatorStatusChanged(floorRequest.CallingFloor, floorRequest.TargetFloor);
+                    OnElevatorStatusChanged(floorRequest.CallingFloor, floorRequest.TargetFloor, enElevatorDoorState.Opened);
                 }
             }
             return Task.CompletedTask;
@@ -141,14 +139,9 @@ namespace ElevatorSimulation.Domain.Services
             ElevatorPassangerCountChanged?.Invoke(elevator.Id, floorRequest.CallingFloor, floorRequest.TargetFloor, excessPassangers);
         }
 
-        private void OnElevatorDoorStatusChanged(enElevatorDoorState elevatorState)
+        private void OnElevatorStatusChanged(int callingFloor, int targetFloor, enElevatorDoorState elevatorState)
         {
-            ElevatorDoorStateChanged?.Invoke(elevator.Id, $"Elevator {elevator.Id} doors {elevatorState} at floor {elevator.CurrentFloor}");
-        }
-
-        private void OnElevatorStatusChanged(int callingFloor, int targetFloor)
-        {
-            ElevatorStatusChanged?.Invoke(elevator.Id, elevator.Direction, callingFloor, elevator.CurrentFloor, targetFloor, elevator.IsMoving);
+            ElevatorStatusChanged?.Invoke(elevator.Id, elevator.Direction, callingFloor, elevator.CurrentFloor, targetFloor, elevator.IsMoving, elevatorState);
         }
 
     }

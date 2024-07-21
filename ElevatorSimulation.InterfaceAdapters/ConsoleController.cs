@@ -122,6 +122,7 @@ namespace ElevatorSimulation.InterfaceAdapters
                         status.Id,
                         status.CurrentFloor,
                         status.Direction,
+                        status.DoorState,
                         status.IsMoving ? ConsoleControllerConstants.MovingStatus : ConsoleControllerConstants.StationaryStatus,
                         status.PassengerCount
                     )
@@ -134,7 +135,7 @@ namespace ElevatorSimulation.InterfaceAdapters
             DisplayHistoryTableHeader();
             foreach (var history in elevatorHistory.Values.SelectMany(h => h))
             {
-                Console.WriteLine($"| {history.ElevatorId,8} | {history.CallingFloor,13} | {history.CurrentFloor,13} | {history.TargetFloor,12} | {history.Direction,-9} | {history.PassengerCount,10} | {history.IsMoving,7} | {history.Timestamp:HH:mm:ss} |");
+                Console.WriteLine($"| {history.ElevatorId,8} | {history.CallingFloor,13} | {history.CurrentFloor,13} | {history.TargetFloor,12} | {history.Direction,-9} | {history.PassengerCount,10} | {history.IsMoving,6} | {history.DoorState,11} | {history.Timestamp:HH:mm:ss} |");
             }
             Console.WriteLine(ConsoleControllerConstants.TableHistorySeparator);
         }

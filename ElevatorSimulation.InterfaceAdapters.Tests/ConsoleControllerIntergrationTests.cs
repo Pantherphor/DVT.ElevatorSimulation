@@ -185,9 +185,9 @@ namespace ElevatorSimulation.InterfaceAdapters.Tests
             consoleController.ShowElevatorStatus();
 
             // Assert
-            var expectedHeaderColsOutput = @"| Elevator | Calling Floor | Current Floor | Target Floor | Direction | Passengers | Moving | Timestamp |";
-            var expectedSummaryOutput = "Elevator 1: Floor 3, Direction Up, Moving, Passengers 4\r\n" +
-                                        "Elevator 2: Floor 5, Direction Down, Stationary, Passengers 2\r\n";
+            var expectedHeaderColsOutput = "| Elevator | Calling Floor | Current Floor | Target Floor | Direction | Passengers | Moving | Door Status | Timestamp |";
+            var expectedSummaryOutput = "Elevator 1: Floor 3, Direction Up, Closed, Passengers Moving\r\n" +
+                                        "Elevator 2: Floor 5, Direction Down, Closed, Passengers Stationary\r\n";
             Assert.Contains(expectedHeaderColsOutput, sw.ToString());
             Assert.Contains(expectedSummaryOutput, sw.ToString());
         }

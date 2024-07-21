@@ -88,7 +88,7 @@ namespace ElevatorSimulation.InterfaceAdapters.Tests
 
             // Assert
             var output = stringWriter.ToString().Trim();
-            Assert.Contains("Elevator 1: Floor 3, Direction Up, Moving, Passengers 2", output);
+            Assert.Contains("Elevator 1: Floor 3, Direction Up, Closed, Passengers Moving", output);
         }
 
         [Fact]

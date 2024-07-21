@@ -213,13 +213,13 @@ namespace ElevatorSimulation.Application.Tests
 
             var mover = new ElevatorMover();
             mover.Initialize(mockElevator.Object);
-            mover.ElevatorDoorStateChanged += (id, status) =>
+            mover.ElevatorStatusChanged += (id, direction, callingFloor, currentFloor, targetFloor, isMoving, elevatorState) =>
             {
-                if (status.Contains("Opened"))
+                if (elevatorState.ToString().Contains("Opened"))
                 {
                     doorStatusOpened = true;
                 }
-                else if (status.Contains("Closed"))
+                else if (elevatorState.ToString().Contains("Closed"))
                 {
                     doorStatusClosed = true;
                 }

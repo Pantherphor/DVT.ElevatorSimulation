@@ -11,5 +11,6 @@ namespace ElevatorSimulation.Domain.Entities
         public bool IsMoving { get; set; }
         public int PassengerCount { get; set; }
         public int CallingFloor { get; set; }
+        public enElevatorDoorState DoorState { get; set; }
     }
 }
