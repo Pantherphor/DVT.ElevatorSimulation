@@ -8,8 +8,8 @@ namespace ElevatorSimulation.Domain.Interfaces
     {
         IEnumerable<IElevator> Elevators { get; set; }
 
-        Task CallElevator(FloorRequest request);
-        Task MoveElevator(int elevatorId, int floor);
+        Task CallElevatorAsync(FloorRequest request);
+        Task MoveElevatorAsync(int elevatorId, int floor);
         IEnumerable<ElevatorStatus> GetElevatorStatus();
     }
 }

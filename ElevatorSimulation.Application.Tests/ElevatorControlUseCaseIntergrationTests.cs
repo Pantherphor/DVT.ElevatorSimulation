@@ -14,7 +14,7 @@ namespace ElevatorSimulation.Application.Tests
         [InlineData(1, 5)]
         [InlineData(2, 3)]
         [InlineData(1, 10)]
-        public void AddTargetFloor_Should_Add_Floor_To_Elevator_Should_Not_Move_Elevator(int elevatorId, int targetFloor)
+        public async void AddTargetFloor_Should_Add_Floor_To_Elevator_Should_Not_Move_Elevator(int elevatorId, int targetFloor)
         {
             // Arrange
             var mockElevator = new Mock<IElevator>();
@@ -35,7 +35,7 @@ namespace ElevatorSimulation.Application.Tests
             var useCase = new ElevatorControlUseCase(building);
 
             // Act
-            useCase.CallElevator(new FloorRequest(0, targetFloor, 2));
+            await useCase.CallElevatorAsync(new FloorRequest(0, targetFloor, 2));
 
             // Assert
             Assert.False(mockElevator.Object.IsMoving);
@@ -46,7 +46,7 @@ namespace ElevatorSimulation.Application.Tests
         [InlineData(0, 5)]
         [InlineData(2, 3)]
         [InlineData(1, 10)]
-        public void MoveElevatorsAsync_Should_Move_Elevators_To_Next_Floor(int elevatorId, int targetFloor)
+        public async void MoveElevatorsAsync_Should_Move_Elevators_To_Next_Floor(int elevatorId, int targetFloor)
         {
             // Arrange
             var mockElevator = new Mock<IElevator>();
@@ -63,8 +63,8 @@ namespace ElevatorSimulation.Application.Tests
             var useCase = new ElevatorControlUseCase(building);
 
             // Act
-            useCase.CallElevator(new FloorRequest(0, targetFloor, 2));
-            useCase.MoveElevator(elevatorId, targetFloor);
+            await useCase.CallElevatorAsync(new FloorRequest(0, targetFloor, 2));
+            await useCase.MoveElevatorAsync(elevatorId, targetFloor);
 
 
             // Assert

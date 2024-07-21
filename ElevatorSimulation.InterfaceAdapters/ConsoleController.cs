@@ -62,7 +62,7 @@ namespace ElevatorSimulation.InterfaceAdapters
                     Console.Write(ConsoleControllerConstants.EnterPassengerCountMessage);
                     if (int.TryParse(Console.ReadLine(), out int passengers))
                     {
-                        elevatorControlUseCase.CallElevator(new FloorRequest(callingFloor, targetFloor, passengers));
+                        elevatorControlUseCase.CallElevatorAsync(new FloorRequest(callingFloor, targetFloor, passengers));
                     }
                     else
                     {
@@ -88,7 +88,7 @@ namespace ElevatorSimulation.InterfaceAdapters
                 Console.Write(ConsoleControllerConstants.EnterMoveToFloorNumberMessage);
                 if (int.TryParse(Console.ReadLine(), out int floor))
                 {
-                    elevatorControlUseCase.MoveElevator(elevatorId, floor);
+                    elevatorControlUseCase.MoveElevatorAsync(elevatorId, floor);
                 }
                 else
                 {

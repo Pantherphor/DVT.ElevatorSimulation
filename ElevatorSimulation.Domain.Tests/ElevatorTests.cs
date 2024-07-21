@@ -2,9 +2,7 @@ using ElevatorSimulation.Domain.Entities;
 using ElevatorSimulation.Domain.Enums;
 using ElevatorSimulation.Domain.Interfaces;
 using ElevatorSimulation.Domain.Services;
-using ElevatorSimulation.Services;
 using Moq;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using Xunit;
 

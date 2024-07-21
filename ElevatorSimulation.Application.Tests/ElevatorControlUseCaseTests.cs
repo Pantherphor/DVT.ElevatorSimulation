@@ -23,30 +23,30 @@ namespace ElevatorSimulation.Application.Tests
         }
 
         [Fact]
-        public void CallElevator_Should_Invoke_ElevatorSystem_CallElevator()
+        public async void CallElevator_Should_Invoke_ElevatorSystem_CallElevator()
         {
             // Arrange
             var request = new FloorRequest(0, 1, 5);
 
             // Act
-            elevatorControlUseCase.CallElevator(request);
+            await elevatorControlUseCase.CallElevatorAsync(request);
 
             // Assert
-            mockElevatorSystem.Verify(es => es.CallElevator(request), Times.Once);
+            mockElevatorSystem.Verify(es => es.CallElevatorAsync(request), Times.Once);
         }
 
         [Fact]
-        public void MoveElevator_Should_Invoke_ElevatorSystem_MoveElevator()
+        public async void MoveElevator_Should_Invoke_ElevatorSystem_MoveElevator()
         {
             // Arrange
             int elevatorId = 1;
             int floor = 5;
 
             // Act
-            elevatorControlUseCase.MoveElevator(elevatorId, floor);
+            await elevatorControlUseCase.MoveElevatorAsync(elevatorId, floor);
 
             // Assert
-            mockElevatorSystem.Verify(es => es.MoveElevator(elevatorId, floor), Times.Once);
+            mockElevatorSystem.Verify(es => es.MoveElevatorAsync(elevatorId, floor), Times.Once);
         }
 
         [Fact]

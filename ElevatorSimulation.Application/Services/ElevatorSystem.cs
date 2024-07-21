@@ -128,7 +128,7 @@ namespace ElevatorSimulation.Services
             this.overloadStrategy = strategy;
         }
 
-        public async Task CallElevator(FloorRequest request)
+        public async Task CallElevatorAsync(FloorRequest request)
         {
             var nearestElevator = Elevators
                                     .Where(e => !e.IsMoving || !e.FloorRequests.Any())
@@ -167,11 +167,11 @@ namespace ElevatorSimulation.Services
                     nearestElevator.AddFloorRequest(new FloorRequest(request.CallingFloor, request.TargetFloor, request.PassengerCount));
                 }
 
-                await MoveElevator(nearestElevator.Id, nearestElevator.CallingFloor);
+                await MoveElevatorAsync(nearestElevator.Id, nearestElevator.CallingFloor);
             }
         }
 
-        public async Task MoveElevator(int elevatorId, int floor)
+        public async Task MoveElevatorAsync(int elevatorId, int floor)
         {
             var moveTasks = Elevators.Select(elevator => elevator.MoveToNextFloorAsync()).ToArray();
             await Task.WhenAll(moveTasks);

@@ -1,13 +1,14 @@
 ﻿using ElevatorSimulation.Domain.Entities;
 using ElevatorSimulation.Domain.Interfaces;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace ElevatorSimulation.Application.UseCases
 {
     public interface IElevatorControlUseCase
     {
-        void CallElevator(FloorRequest request);
-        void MoveElevator(int elevatorId, int floor);
+        Task CallElevatorAsync(FloorRequest request);
+        Task MoveElevatorAsync(int elevatorId, int floor);
         IEnumerable<ElevatorStatus> GetElevatorStatus();
     }
 
@@ -22,14 +23,14 @@ namespace ElevatorSimulation.Application.UseCases
             elevatorSystem = this.building.ElevatorSystem;
         }
 
-        public void CallElevator(FloorRequest request)
+        public async Task CallElevatorAsync(FloorRequest request)
         {
-            elevatorSystem.CallElevator(request);
+            await elevatorSystem.CallElevatorAsync(request);
         }
 
-        public void MoveElevator(int elevatorId, int floor)
+        public async Task MoveElevatorAsync(int elevatorId, int floor)
         {
-            elevatorSystem.MoveElevator(elevatorId, floor);
+            await elevatorSystem.MoveElevatorAsync(elevatorId, floor);
         }
 
         public IEnumerable<ElevatorStatus> GetElevatorStatus()

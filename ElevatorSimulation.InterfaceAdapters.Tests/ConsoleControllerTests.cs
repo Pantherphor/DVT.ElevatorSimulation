@@ -37,7 +37,7 @@ namespace ElevatorSimulation.InterfaceAdapters.Tests
             controller.CallElevator();
 
             // Assert
-            mockElevatorControlUseCase.Verify(e => e.CallElevator(It.Is<FloorRequest>(r => r.CallingFloor == 1 && r.TargetFloor == 5 && r.PassengerCount == 3)), Times.Once);
+            mockElevatorControlUseCase.Verify(e => e.CallElevatorAsync(It.Is<FloorRequest>(r => r.CallingFloor == 1 && r.TargetFloor == 5 && r.PassengerCount == 3)), Times.Once);
         }
 
         [Fact]
@@ -53,7 +53,7 @@ namespace ElevatorSimulation.InterfaceAdapters.Tests
             controller.MoveElevator();
 
             // Assert
-            mockElevatorControlUseCase.Verify(e => e.MoveElevator(1, 5), Times.Once);
+            mockElevatorControlUseCase.Verify(e => e.MoveElevatorAsync(1, 5), Times.Once);
         }
 
         [Fact]
@@ -115,7 +115,7 @@ namespace ElevatorSimulation.InterfaceAdapters.Tests
             controller.Run();
 
             // Assert
-            mockElevatorControlUseCase.Verify(e => e.CallElevator(It.IsAny<FloorRequest>()), Times.Once);
+            mockElevatorControlUseCase.Verify(e => e.CallElevatorAsync(It.IsAny<FloorRequest>()), Times.Once);
         }
 
         [Fact]
@@ -134,7 +134,7 @@ namespace ElevatorSimulation.InterfaceAdapters.Tests
             controller.Run();
 
             // Assert
-            mockElevatorControlUseCase.Verify(e => e.MoveElevator(It.IsAny<int>(), It.IsAny<int>()), Times.Once);
+            mockElevatorControlUseCase.Verify(e => e.MoveElevatorAsync(It.IsAny<int>(), It.IsAny<int>()), Times.Once);
         }
 
         [Fact]

@@ -75,14 +75,14 @@ namespace ElevatorSimulation.Application.Tests
         }
 
         [Fact]
-        public void CallElevator_ShouldAssignRequestToNearestElevator()
+        public async void CallElevator_ShouldAssignRequestToNearestElevator()
         {
             // Arrange
             var request = new FloorRequest(0,5,2);
             
 
             // Act
-            elevatorSystem.CallElevator(request);
+            await elevatorSystem.CallElevatorAsync(request);
 
             // Assert
             var nearestElevator = mockElevators
@@ -98,7 +98,7 @@ namespace ElevatorSimulation.Application.Tests
         }
 
         [Fact]
-        public void CallElevator_ShouldHandleOverload()
+        public async void CallElevator_ShouldHandleOverload()
         {
             // Arrange
             var overloadStrategyMock = new Mock<IOverloadStrategy>();
@@ -109,7 +109,7 @@ namespace ElevatorSimulation.Application.Tests
             mockElevators[0].Setup(e => e.GetExcessPassangers(request.PassengerCount)).Returns(5);
 
             // Act
-            elevatorSystem.CallElevator(request);
+            await elevatorSystem.CallElevatorAsync(request);
 
             // Assert
             var overloadedElevator = mockElevators[0].Object;
@@ -117,14 +117,14 @@ namespace ElevatorSimulation.Application.Tests
         }
 
         [Fact]
-        public void MoveElevator_Should_Call_MoveToNextFloorAsync()
+        public async void MoveElevator_Should_Call_MoveToNextFloorAsync()
         {
             // Arrange
             int elevatorId = 1;
             int targetFloor = 5;
 
             // Act
-            elevatorSystem.MoveElevator(elevatorId, targetFloor);
+            await elevatorSystem.MoveElevatorAsync(elevatorId, targetFloor);
 
             // Assert
             var elevatorMock = mockElevators.First(e => e.Object.Id == elevatorId);
@@ -168,13 +168,13 @@ namespace ElevatorSimulation.Application.Tests
         }
 
         [Fact]
-        public void CallElevator_Should_Assign_Request_To_Nearest_Elevator()
+        public async void CallElevator_Should_Assign_Request_To_Nearest_Elevator()
         {
             // Arrange
             var request = new FloorRequest(callingFloor: 2, targetFloor: 5, passengerCount: 3);
 
             // Act
-            elevatorSystem.CallElevator(request);
+            await elevatorSystem.CallElevatorAsync(request);
 
             // Assert
             mockElevator1.Verify(e => e.AddFloorRequest(It.Is<FloorRequest>(fr => fr.TargetFloor == request.TargetFloor && fr.PassengerCount == request.PassengerCount)), Times.Once);

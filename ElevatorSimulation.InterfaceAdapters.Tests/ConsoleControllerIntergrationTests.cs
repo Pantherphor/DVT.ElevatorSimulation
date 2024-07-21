@@ -59,7 +59,7 @@ namespace ElevatorSimulation.InterfaceAdapters.Tests
             consoleController.Run();
 
             // Assert
-            mockElevatorControlUseCase.Verify(es => es.CallElevator(It.IsAny<FloorRequest>()), Times.Once);
+            mockElevatorControlUseCase.Verify(es => es.CallElevatorAsync(It.IsAny<FloorRequest>()), Times.Once);
 
             // Cleanup
             Console.SetIn(new StreamReader(Console.OpenStandardInput()));
@@ -80,7 +80,7 @@ namespace ElevatorSimulation.InterfaceAdapters.Tests
 
             // Assert
             Assert.Contains("Invalid floor number.", sw.ToString());
-            mockElevatorControlUseCase.Verify(es => es.CallElevator(new FloorRequest(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<int>())), Times.Never);
+            mockElevatorControlUseCase.Verify(es => es.CallElevatorAsync(new FloorRequest(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<int>())), Times.Never);
         }
 
         [Fact]
@@ -97,7 +97,7 @@ namespace ElevatorSimulation.InterfaceAdapters.Tests
 
             // Assert
             Assert.Contains("Invalid number of passengers.", sw.ToString());
-            mockElevatorControlUseCase.Verify(es => es.CallElevator(new FloorRequest(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<int>())), Times.Never);
+            mockElevatorControlUseCase.Verify(es => es.CallElevatorAsync(new FloorRequest(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<int>())), Times.Never);
         }
 
         [Fact]
@@ -111,7 +111,7 @@ namespace ElevatorSimulation.InterfaceAdapters.Tests
             consoleController.MoveElevator();
 
             // Assert
-            mockElevatorControlUseCase.Verify(es => es.MoveElevator(1, 5), Times.Once);
+            mockElevatorControlUseCase.Verify(es => es.MoveElevatorAsync(1, 5), Times.Once);
         }
 
         [Fact]
@@ -128,7 +128,7 @@ namespace ElevatorSimulation.InterfaceAdapters.Tests
 
             // Assert
             Assert.Contains("Invalid elevator ID.", sw.ToString());
-            mockElevatorControlUseCase.Verify(es => es.MoveElevator(It.IsAny<int>(), It.IsAny<int>()), Times.Never);
+            mockElevatorControlUseCase.Verify(es => es.MoveElevatorAsync(It.IsAny<int>(), It.IsAny<int>()), Times.Never);
         }
 
         [Fact]
@@ -145,7 +145,7 @@ namespace ElevatorSimulation.InterfaceAdapters.Tests
 
             // Assert
             Assert.Contains("Invalid floor number.", sw.ToString());
-            mockElevatorControlUseCase.Verify(es => es.MoveElevator(It.IsAny<int>(), It.IsAny<int>()), Times.Never);
+            mockElevatorControlUseCase.Verify(es => es.MoveElevatorAsync(It.IsAny<int>(), It.IsAny<int>()), Times.Never);
         }
 
         [Fact]
