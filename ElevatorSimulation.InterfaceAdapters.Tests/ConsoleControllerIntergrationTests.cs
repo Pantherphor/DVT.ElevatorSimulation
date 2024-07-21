@@ -12,6 +12,8 @@ namespace ElevatorSimulation.InterfaceAdapters.Tests
 {
     public class ConsoleControllerIntergrationTests : IDisposable
     {
+        private readonly Dictionary<int, IList<ElevatorMovementHistory>> elevatorHistory = new();
+
         private readonly Mock<IElevatorControlUseCase> mockElevatorControlUseCase;
         private readonly ConsoleController consoleController;
         private readonly TextReader originalInput;
@@ -158,7 +160,23 @@ namespace ElevatorSimulation.InterfaceAdapters.Tests
                 new ElevatorStatus { Id = 2, CurrentFloor = 5, Direction = enElevatorDirection.Down, IsMoving = false, PassengerCount = 2 }
             };
 
-            Moq.Language.Flow.IReturnsResult<IElevatorControlUseCase> returnsResult = mockElevatorControlUseCase.Setup(es => es.GetElevatorStatus()).Returns(statuses);
+            elevatorHistory[1] = new List<ElevatorMovementHistory>();
+
+            var elevator = statuses[1];
+            elevatorHistory[1].Add(new ElevatorMovementHistory
+            {
+                ElevatorId = elevator.Id,
+                CallingFloor = elevator.CallingFloor,
+                CurrentFloor = elevator.CurrentFloor,
+                TargetFloor = elevator.TargetFloor,
+                Direction = elevator.Direction,
+                PassengerCount = elevator.PassengerCount,
+                IsMoving = elevator.IsMoving,
+                Timestamp = DateTime.Now
+            });
+
+            mockElevatorControlUseCase.Setup(e => e.GetElevatorStatus()).Returns(statuses);
+            mockElevatorControlUseCase.Setup(e => e.GetElevatorMovementHistory()).Returns(elevatorHistory);
 
             using var sw = new StringWriter();
             Console.SetOut(sw);
@@ -167,9 +185,11 @@ namespace ElevatorSimulation.InterfaceAdapters.Tests
             consoleController.ShowElevatorStatus();
 
             // Assert
-            var expectedOutput = "Elevator 1: Floor 3, Direction Up, Moving, Passengers 4\r\n" +
-                                 "Elevator 2: Floor 5, Direction Down, Stationary, Passengers 2\r\n";
-            Assert.Equal(expectedOutput, sw.ToString());
+            var expectedHeaderColsOutput = @"| Elevator | Calling Floor | Current Floor | Target Floor | Direction | Passengers | Moving | Timestamp |";
+            var expectedSummaryOutput = "Elevator 1: Floor 3, Direction Up, Moving, Passengers 4\r\n" +
+                                        "Elevator 2: Floor 5, Direction Down, Stationary, Passengers 2\r\n";
+            Assert.Contains(expectedHeaderColsOutput, sw.ToString());
+            Assert.Contains(expectedSummaryOutput, sw.ToString());
         }
 
         public void Dispose()

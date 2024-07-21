@@ -10,6 +10,7 @@ namespace ElevatorSimulation.Application.UseCases
         Task CallElevatorAsync(FloorRequest request);
         Task MoveElevatorAsync(int elevatorId, int floor);
         IEnumerable<ElevatorStatus> GetElevatorStatus();
+        IDictionary<int, IList<ElevatorMovementHistory>> GetElevatorMovementHistory();
     }
 
     public class ElevatorControlUseCase : IElevatorControlUseCase
@@ -36,6 +37,11 @@ namespace ElevatorSimulation.Application.UseCases
         public IEnumerable<ElevatorStatus> GetElevatorStatus()
         {
             return elevatorSystem.GetElevatorStatus();
+        }
+
+        public IDictionary<int, IList<ElevatorMovementHistory>> GetElevatorMovementHistory()
+        {
+            return elevatorSystem.GetElevatorMovementHistory();
         }
     }
 }

@@ -19,6 +19,9 @@
         public const string ElevatorStatusMessageFormat = "Elevator {0}: Floor {1}, Direction {2}, {3}, Passengers {4}";
         public const string MovingStatus = "Moving";
         public const string StationaryStatus = "Stationary";
+
+        public const string TableHistorySeparator = "--------------------------------------------------------------------------------------------------------------";
+        public static string TableHistoryHeader = "| Elevator | Calling Floor | Current Floor | Target Floor | Direction | Passengers | Moving | Timestamp |";
     }
 
 }

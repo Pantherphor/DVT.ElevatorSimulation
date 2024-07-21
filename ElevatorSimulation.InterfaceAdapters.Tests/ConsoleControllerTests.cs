@@ -19,6 +19,12 @@ namespace ElevatorSimulation.InterfaceAdapters.Tests
         public ConsoleControllerTests()
         {
             mockElevatorControlUseCase = new Mock<IElevatorControlUseCase>();
+            var history = new Dictionary<int, IList<ElevatorMovementHistory>>
+            {
+
+            };
+
+            mockElevatorControlUseCase.Setup(e => e.GetElevatorMovementHistory()).Returns(history);
             controller = new ConsoleController(mockElevatorControlUseCase.Object);
             originalInput = Console.In;
             originalOutput = Console.Out;
@@ -66,7 +72,13 @@ namespace ElevatorSimulation.InterfaceAdapters.Tests
                 new ElevatorStatus { Id = 1, CurrentFloor = 3, Direction = enElevatorDirection.Up, IsMoving = true, PassengerCount = 2 }
             };
 
+            var history = new Dictionary<int, IList<ElevatorMovementHistory>>
+            {
+                
+            };
+
             mockElevatorControlUseCase.Setup(e => e.GetElevatorStatus()).Returns(statuses);
+            mockElevatorControlUseCase.Setup(e => e.GetElevatorMovementHistory()).Returns(history);
 
             var stringWriter = new StringWriter();
             Console.SetOut(stringWriter);
@@ -148,6 +160,7 @@ namespace ElevatorSimulation.InterfaceAdapters.Tests
 
             Console.SetIn(stringReader);
             Console.SetOut(stringWriter);
+
 
             // Act
             controller.Run();

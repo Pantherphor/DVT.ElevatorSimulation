@@ -2,7 +2,6 @@
 {
     public static class ConsoleConstants
     {
-        public const string TableSeparator = "--------------------------------------------------------------------------------------------------------------";
         public const string TableHeader = "| Elevator | Calling Floor | Current Floor | Target Floor | Direction | Passengers | IsMoving |";
         public const string DoorClosedHeader = "----------------------------------------------------------------";
         public const string PassangerCountHeader = "-------------------------------------------------------------------------";

@@ -11,5 +11,6 @@ namespace ElevatorSimulation.Domain.Interfaces
         Task CallElevatorAsync(FloorRequest request);
         Task MoveElevatorAsync(int elevatorId, int floor);
         IEnumerable<ElevatorStatus> GetElevatorStatus();
+        Dictionary<int, IList<ElevatorMovementHistory>> GetElevatorMovementHistory();
     }
 }

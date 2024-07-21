@@ -10,23 +10,11 @@ using System.Threading.Tasks;
 
 namespace ElevatorSimulation.Services
 {
-    public class ElevatorMovementHistory
-    {
-        public int ElevatorId { get; set; }
-        public int CallingFloor { get; set; }
-        public int CurrentFloor { get; set; }
-        public int TargetFloor { get; set; }
-        public enElevatorDirection Direction { get; set; }
-        public int PassengerCount { get; set; }
-        public bool IsMoving { get; set; }
-        public DateTime Timestamp { get; set; }
-    }
-
     public class ElevatorSystem : IElevatorSystem
     {
         private IOverloadStrategy overloadStrategy;
         private readonly Dictionary<int, ElevatorStatus> elevatorStatuses = new();
-        private readonly Dictionary<int, List<ElevatorMovementHistory>> elevatorHistory = new();
+        private readonly Dictionary<int, IList<ElevatorMovementHistory>> elevatorHistory = new();
 
         public ElevatorSystem(IEnumerable<IElevator> elevators)
         {
@@ -82,25 +70,12 @@ namespace ElevatorSimulation.Services
 
         public IEnumerable<ElevatorStatus> GetElevatorStatus()
         {
-            DisplayElevatorHistory();
             return Elevators.Select(o => o.GetElevatorStatus());
         }
 
-        private void DisplayElevatorHistory()
+        public Dictionary<int, IList<ElevatorMovementHistory>> GetElevatorMovementHistory()
         {
-            DisplayTableHeader();
-            foreach (var history in elevatorHistory.Values.SelectMany(h => h))
-            {
-                Console.WriteLine($"| {history.ElevatorId,8} | {history.CallingFloor,13} | {history.CurrentFloor,13} | {history.TargetFloor,12} | {history.Direction,-9} | {history.PassengerCount,10} | {history.IsMoving,7} | {history.Timestamp:HH:mm:ss} |");
-            }
-            Console.WriteLine(ConsoleConstants.TableSeparator);
-        }
-
-        private void DisplayTableHeader()
-        {
-            Console.WriteLine(ConsoleConstants.TableSeparator);
-            Console.WriteLine("| Elevator | Calling Floor | Current Floor | Target Floor | Direction | Passengers | Moving | Timestamp |");
-            Console.WriteLine(ConsoleConstants.TableSeparator);
+            return elevatorHistory;
         }
 
         private void HandleDoorClosed(int elevatorId, string eventMessage)
@@ -108,17 +83,6 @@ namespace ElevatorSimulation.Services
             Console.WriteLine(ConsoleConstants.DoorClosedHeader);
             Console.WriteLine($"| {ConsoleConstants.ElevatorIdMessage} {elevatorId} | {ConsoleConstants.EventMessage} {eventMessage,16} |");
             Console.WriteLine(ConsoleConstants.DoorClosedHeader);
-        }
-
-        private void HandleElevatorPassangerCountChanged(int elevatorId, int callingFloor, int targetFloor, int excessPassangers)
-        {
-            Console.WriteLine(ConsoleConstants.PassangerCountHeader);
-            Console.WriteLine("| Elevator | Calling Floor | Target Floor | Passengers |");
-            Console.WriteLine(ConsoleConstants.PassangerCountHeader);
-
-            Console.WriteLine(ConsoleConstants.PassangerCountHeader);
-            Console.WriteLine($"| {elevatorId,8} | {callingFloor,13} | {targetFloor,13} | {excessPassangers,8} |");
-            Console.WriteLine(ConsoleConstants.PassangerCountHeader);
         }
 
         public IEnumerable<IElevator> Elevators { get; set; }

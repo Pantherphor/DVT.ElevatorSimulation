@@ -1,6 +1,8 @@
 ﻿using ElevatorSimulation.Application.UseCases;
 using ElevatorSimulation.Domain.Entities;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.CompilerServices;
 
 [assembly: InternalsVisibleTo("ElevatorSimulation.InterfaceAdapters.Tests")]
@@ -103,6 +105,14 @@ namespace ElevatorSimulation.InterfaceAdapters
 
         internal void ShowElevatorStatus()
         {
+            var elevatorHistory = elevatorControlUseCase.GetElevatorMovementHistory();
+            DisplayElevatorHistory(elevatorHistory);
+            
+            DisplayElecatorStatusSummery();
+        }
+
+        private void DisplayElecatorStatusSummery()
+        {
             var statuses = elevatorControlUseCase.GetElevatorStatus();
             foreach (var status in statuses)
             {
@@ -118,6 +128,24 @@ namespace ElevatorSimulation.InterfaceAdapters
                 );
             }
         }
+
+        private void DisplayElevatorHistory(IDictionary<int, IList<ElevatorMovementHistory>> elevatorHistory)
+        {
+            DisplayHistoryTableHeader();
+            foreach (var history in elevatorHistory.Values.SelectMany(h => h))
+            {
+                Console.WriteLine($"| {history.ElevatorId,8} | {history.CallingFloor,13} | {history.CurrentFloor,13} | {history.TargetFloor,12} | {history.Direction,-9} | {history.PassengerCount,10} | {history.IsMoving,7} | {history.Timestamp:HH:mm:ss} |");
+            }
+            Console.WriteLine(ConsoleControllerConstants.TableHistorySeparator);
+        }
+
+        private void DisplayHistoryTableHeader()
+        {
+            Console.WriteLine(ConsoleControllerConstants.TableHistorySeparator);
+            Console.WriteLine(ConsoleControllerConstants.TableHistoryHeader);
+            Console.WriteLine(ConsoleControllerConstants.TableHistorySeparator);
+        }
+
     }
 
 }
