@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 [assembly: InternalsVisibleTo("ElevatorSimulation.Application.Tests")]
 namespace ElevatorSimulation.Domain.Services
 {
-    public interface IElevatorMover : IElevatorEvents
+    public interface IElevatorMover : IElevatorMoverEvents
     {
         Task MoveToNextFloorAsync();
         IElevatorMover Initialize(IElevator elevator);
@@ -21,7 +21,7 @@ namespace ElevatorSimulation.Domain.Services
 
         public event Action<int, string> ElevatorDoorStateChanged;
         public event Action<int, enElevatorDirection, int, int, int, bool> ElevatorStatusChanged;
-        public event Action<int, int, int, int> ElevatorPassangerCountChanged;
+        public event Action<int, int, int, int> ElevatorPassangerCountChanged; //TODO: try moving this to the elevator class
 
         public IElevatorMover Initialize(IElevator elevator)
         {

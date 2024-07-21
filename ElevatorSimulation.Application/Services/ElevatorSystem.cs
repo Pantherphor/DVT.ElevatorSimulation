@@ -6,13 +6,27 @@ using ElevatorSimulation.Domain.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace ElevatorSimulation.Services
 {
+    public class ElevatorMovementHistory
+    {
+        public int ElevatorId { get; set; }
+        public int CallingFloor { get; set; }
+        public int CurrentFloor { get; set; }
+        public int TargetFloor { get; set; }
+        public enElevatorDirection Direction { get; set; }
+        public int PassengerCount { get; set; }
+        public bool IsMoving { get; set; }
+        public DateTime Timestamp { get; set; }
+    }
+
     public class ElevatorSystem : IElevatorSystem
     {
         private IOverloadStrategy overloadStrategy;
         private readonly Dictionary<int, ElevatorStatus> elevatorStatuses = new();
+        private readonly Dictionary<int, List<ElevatorMovementHistory>> elevatorHistory = new();
 
         public ElevatorSystem(IEnumerable<IElevator> elevators)
         {
@@ -24,7 +38,6 @@ namespace ElevatorSimulation.Services
                 var mover = elevator.ElevatorMover;
                 mover.ElevatorDoorStateChanged += HandleDoorClosed;
                 mover.ElevatorStatusChanged += HandleElevatorStatusChanged;
-                mover.ElevatorPassangerCountChanged += HandleElevatorPassangerCountChanged;
 
                 elevatorStatuses[elevator.Id] = new ElevatorStatus
                 {
@@ -35,6 +48,8 @@ namespace ElevatorSimulation.Services
                     PassengerCount = elevator.PassengerCount,
                     IsMoving = elevator.IsMoving
                 };
+
+                elevatorHistory[elevator.Id] = new List<ElevatorMovementHistory>();
             }
         }
 
@@ -51,16 +66,32 @@ namespace ElevatorSimulation.Services
                 PassengerCount = elevator.PassengerCount,
                 IsMoving = isMoving
             };
-            DrawTable();
+
+            elevatorHistory[elevatorId].Add(new ElevatorMovementHistory
+            {
+                ElevatorId = elevator.Id,
+                CallingFloor = callingFloor,
+                CurrentFloor = currentFloor,
+                TargetFloor = targetFloor,
+                Direction = direction,
+                PassengerCount = elevator.PassengerCount,
+                IsMoving = isMoving,
+                Timestamp = DateTime.Now
+            });
         }
 
-        private void DrawTable()
+        public IEnumerable<ElevatorStatus> GetElevatorStatus()
         {
-            //Console.Clear();
+            DisplayElevatorHistory();
+            return Elevators.Select(o => o.GetElevatorStatus());
+        }
+
+        private void DisplayElevatorHistory()
+        {
             DisplayTableHeader();
-            foreach (var status in elevatorStatuses.Values)
+            foreach (var history in elevatorHistory.Values.SelectMany(h => h))
             {
-                Console.WriteLine($"| {status.Id,8} | {status.CallingFloor,13} | {status.CurrentFloor,13} | {status.TargetFloor,12} | {status.Direction,-9} | {status.PassengerCount,10} | {status.IsMoving,8} |");
+                Console.WriteLine($"| {history.ElevatorId,8} | {history.CallingFloor,13} | {history.CurrentFloor,13} | {history.TargetFloor,12} | {history.Direction,-9} | {history.PassengerCount,10} | {history.IsMoving,7} | {history.Timestamp:HH:mm:ss} |");
             }
             Console.WriteLine(ConsoleConstants.TableSeparator);
         }
@@ -68,7 +99,7 @@ namespace ElevatorSimulation.Services
         private void DisplayTableHeader()
         {
             Console.WriteLine(ConsoleConstants.TableSeparator);
-            Console.WriteLine(ConsoleConstants.TableHeader);
+            Console.WriteLine("| Elevator | Calling Floor | Current Floor | Target Floor | Direction | Passengers | Moving | Timestamp |");
             Console.WriteLine(ConsoleConstants.TableSeparator);
         }
 
@@ -97,9 +128,10 @@ namespace ElevatorSimulation.Services
             this.overloadStrategy = strategy;
         }
 
-        public void CallElevator(FloorRequest request)
+        public async Task CallElevator(FloorRequest request)
         {
             var nearestElevator = Elevators
+                                    .Where(e => !e.IsMoving || !e.FloorRequests.Any())
                                     .OrderBy(e => Math.Abs(e.CurrentFloor - request.CallingFloor))
                                     .ThenBy(e => e.PassengerCount)
                                     .ThenBy(e => e.Direction == enElevatorDirection.None ? 0 : 1)
@@ -107,29 +139,42 @@ namespace ElevatorSimulation.Services
                                                     (e.Direction == enElevatorDirection.Down && request.CallingFloor <= e.CurrentFloor) ? 0 : 1)
                                     .FirstOrDefault();
 
+            if (nearestElevator == null)
+            {
+                // All elevators are busy, pick the one with the least pending requests
+                nearestElevator = Elevators
+                                    .OrderBy(e => e.FloorRequests.Count)
+                                    .ThenBy(e => Math.Abs(e.CurrentFloor - request.CallingFloor))
+                                    .FirstOrDefault();
+            }
+
             if (nearestElevator != null)
             {
-                nearestElevator.AddFloorRequest(new FloorRequest(request.CallingFloor, request.TargetFloor, request.PassengerCount));
-
                 if (nearestElevator.IsFull(request.PassengerCount))
                 {
                     int excessPassengers = nearestElevator.GetExcessPassangers(request.PassengerCount);
+                    var floorRequest = new FloorRequest(
+                        request.CallingFloor, 
+                        request.TargetFloor, 
+                        (request.PassengerCount - excessPassengers)
+                        );
+
+                    nearestElevator.AddFloorRequest(floorRequest);
                     overloadStrategy.HandleOverload(this, nearestElevator, request.CallingFloor, request.TargetFloor, excessPassengers);
                 }
+                else
+                {
+                    nearestElevator.AddFloorRequest(new FloorRequest(request.CallingFloor, request.TargetFloor, request.PassengerCount));
+                }
 
-                MoveElevator(nearestElevator.Id, nearestElevator.CallingFloor);
+                await MoveElevator(nearestElevator.Id, nearestElevator.CallingFloor);
             }
         }
 
-        public void MoveElevator(int elevatorId, int floor)
+        public async Task MoveElevator(int elevatorId, int floor)
         {
-            var elevator = Elevators.FirstOrDefault(e => e.Id == elevatorId);
-            elevator?.MoveToNextFloorAsync();
-        }
-
-        public IEnumerable<ElevatorStatus> GetElevatorStatus()
-        {
-            return Elevators.Select(o => o.GetElevatorStatus());
+            var moveTasks = Elevators.Select(elevator => elevator.MoveToNextFloorAsync()).ToArray();
+            await Task.WhenAll(moveTasks);
         }
     }
 

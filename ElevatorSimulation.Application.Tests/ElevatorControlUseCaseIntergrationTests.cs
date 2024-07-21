@@ -11,7 +11,7 @@ namespace ElevatorSimulation.Application.Tests
     public class ElevatorControlUseCaseIntergrationTests
     {
         [Theory(Timeout = 100)]
-        [InlineData(0, 5)]
+        [InlineData(1, 5)]
         [InlineData(2, 3)]
         [InlineData(1, 10)]
         public void AddTargetFloor_Should_Add_Floor_To_Elevator_Should_Not_Move_Elevator(int elevatorId, int targetFloor)
@@ -20,6 +20,12 @@ namespace ElevatorSimulation.Application.Tests
             var mockElevator = new Mock<IElevator>();
             mockElevator.Setup(e => e.Id).Returns(elevatorId);
             mockElevator.Setup(e => e.IsMoving).Returns(false);
+            mockElevator.Setup(e => e.IncrementPassengerCount(It.IsAny<int>()))
+                .Callback<int>(passengerCount =>
+                {
+                    var passangerCount = mockElevator.Object.PassengerCount + passengerCount;
+                    mockElevator.Setup(e => e.PassengerCount).Returns(passangerCount);
+                });
             var elevators = new List<IElevator> { mockElevator.Object };
 
             var mockElevatorSystem = new Mock<IElevatorSystem>();

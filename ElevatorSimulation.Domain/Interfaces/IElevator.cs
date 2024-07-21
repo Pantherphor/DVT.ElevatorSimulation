@@ -21,7 +21,7 @@ namespace ElevatorSimulation.Domain.Interfaces
         int GetExcessPassangers(int passengerCount);
         int IncrementCurrentFloor(int step);
         void DecrementPassengerCount(int passengerCount);
-        void IncrementPassengerCount(int passengerCount);
+        internal void IncrementPassengerCount(int passengerCount);
         void ResetPassengerCount();
         void SetCallingFloor(int callingFloor);
     }

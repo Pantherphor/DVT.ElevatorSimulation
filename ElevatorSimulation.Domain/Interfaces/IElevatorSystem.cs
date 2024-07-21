@@ -1,5 +1,6 @@
 ﻿using ElevatorSimulation.Domain.Entities;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace ElevatorSimulation.Domain.Interfaces
 {
@@ -7,8 +8,8 @@ namespace ElevatorSimulation.Domain.Interfaces
     {
         IEnumerable<IElevator> Elevators { get; set; }
 
-        void CallElevator(FloorRequest request);
-        void MoveElevator(int elevatorId, int floor);
+        Task CallElevator(FloorRequest request);
+        Task MoveElevator(int elevatorId, int floor);
         IEnumerable<ElevatorStatus> GetElevatorStatus();
     }
 }

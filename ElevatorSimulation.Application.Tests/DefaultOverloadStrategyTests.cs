@@ -36,7 +36,7 @@ namespace ElevatorSimulation.Application.Tests
 
             // Assert
             Assert.Equal(8, nearestElevator.PassengerCount);
-            Assert.Equal(7, elevators[1].PassengerCount); // 2 + 5
+            Assert.Equal(2, elevators[1].PassengerCount); // elevator 2, should now have 2 passangers as set up above 
             Assert.Contains(targetFloor, elevators[1].FloorRequests.Select(o => o.TargetFloor));
         }
 
@@ -66,7 +66,7 @@ namespace ElevatorSimulation.Application.Tests
             // Assert
             Assert.Equal(10, nearestElevator.PassengerCount); // Nearest elevator remains at max capacity
             Assert.Equal(10, elevators[1].PassengerCount); // Secondary elevator remains at max capacity
-            Assert.Equal(2, nearestElevator.FloorRequests.Count);
+            Assert.Equal(1, nearestElevator.FloorRequests.Count); //With the new changes, the elevators should shad the load, by moving to the next available lift
             Assert.Contains(5, nearestElevator.FloorRequests.Select(o => o.PassengerCount)); // Excess passengers remain
             Assert.Contains(targetFloor, nearestElevator.FloorRequests.Select(o => o.TargetFloor)); // Floor request should be added to nearest elevator queue
         }

@@ -22,20 +22,6 @@ namespace ElevatorSimulation.Application.UseCases
             elevatorSystem = this.building.ElevatorSystem;
         }
 
-        //public void AddTargetFloor(FloorRequest floorRequest, int elevatorId)
-        //{
-        //    var elevator = _building.ElevatorSystem.Elevators.ToList()[elevatorId];
-        //    elevator.AddFloorRequest(floorRequest);
-        //}
-
-        //public async Task MoveElevatorsAsync()
-        //{
-        //    foreach (var elevator in _building.ElevatorSystem.Elevators)
-        //    {
-        //        await elevator.MoveToNextFloorAsync();
-        //    }
-        //}
-
         public void CallElevator(FloorRequest request)
         {
             elevatorSystem.CallElevator(request);

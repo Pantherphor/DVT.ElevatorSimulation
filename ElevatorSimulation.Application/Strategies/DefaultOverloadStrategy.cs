@@ -9,8 +9,6 @@ namespace ElevatorSimulation.Application.Strategies
     {
         public void HandleOverload(IElevatorSystem elevatorSystem, IElevator nearestElevator, int callingFloor, int targetFloor, int excessPassengers)
         {
-            nearestElevator.AddFloorRequest(new FloorRequest(callingFloor, targetFloor, excessPassengers));
-
             var availableElevator = elevatorSystem.Elevators
                 .Where(e => e.Id != nearestElevator.Id && e.PassengerCount < e.MaxPassengerLimit)
                 .OrderBy(e => Math.Abs(e.CurrentFloor - nearestElevator.CurrentFloor))
@@ -19,7 +17,6 @@ namespace ElevatorSimulation.Application.Strategies
             if (availableElevator != null)
             {
                 int passengersToTransfer = Math.Min(excessPassengers, availableElevator.MaxPassengerLimit - availableElevator.PassengerCount);
-                availableElevator.IncrementPassengerCount(passengersToTransfer);
                 excessPassengers -= passengersToTransfer;
                 availableElevator.AddFloorRequest(new FloorRequest(callingFloor, targetFloor, passengersToTransfer));
             }

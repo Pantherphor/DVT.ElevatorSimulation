@@ -1,9 +1,13 @@
 ﻿using ElevatorSimulation.Domain.Enums;
 using ElevatorSimulation.Domain.Interfaces;
 using ElevatorSimulation.Domain.Services;
+using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
+[assembly: InternalsVisibleTo("DynamicProxyGenAssembly2")]
+[assembly: InternalsVisibleTo("DynamicProxyGenAssembly22")]
 namespace ElevatorSimulation.Domain.Entities
 {
     public class Elevator : IElevator
@@ -83,7 +87,7 @@ namespace ElevatorSimulation.Domain.Entities
             PassengerCount -= passengerCount;
         }
 
-        public void IncrementPassengerCount(int passengerCount)
+        void IElevator.IncrementPassengerCount(int passengerCount)
         {
             PassengerCount += passengerCount;
         }
@@ -97,5 +101,6 @@ namespace ElevatorSimulation.Domain.Entities
         {
             CallingFloor = callingFloor;
         }
+
     }
 }

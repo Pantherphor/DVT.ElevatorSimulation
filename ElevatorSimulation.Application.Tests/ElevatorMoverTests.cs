@@ -260,10 +260,10 @@ namespace ElevatorSimulation.Application.Tests
             mockElevator.Setup(e => e.CurrentFloor).Returns(1);
             mockElevator.Setup(e => e.PassengerCount).Returns(2);
             mockElevator.Setup(e => e.IsFull(It.IsAny<int>())).Returns(false);
-            mockElevator.Setup(e => e.IncrementPassengerCount(It.IsAny<int>())).Callback<int>(count =>
+            mockElevator.Setup(e => e.IncrementPassengerCount(It.IsAny<int>())).Callback<int>(passengerCount =>
             {
                 var currentCount = mockElevator.Object.PassengerCount;
-                mockElevator.Setup(e => e.PassengerCount).Returns(currentCount + count);
+                mockElevator.Setup(e => e.PassengerCount).Returns(currentCount + passengerCount);
             });
             var mover = new ElevatorMover();
             mover.Initialize(mockElevator.Object);
