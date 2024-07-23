@@ -3,7 +3,7 @@ using System;
 
 namespace ElevatorSimulation.Domain.Entities
 {
-    public class ElevatorMovementHistory
+    public record ElevatorMovementHistory
     {
         public int ElevatorId { get; set; }
         public int CallingFloor { get; set; }

@@ -20,7 +20,6 @@ namespace ElevatorSimulation.Domain.Services
         private IElevator elevator;
 
         public event Action<int, enElevatorDirection, int, int, int, bool, enElevatorDoorState> ElevatorStatusChanged;
-        public event Action<int, int, int, int> ElevatorPassangerCountChanged; //TODO: try moving this to the elevator class
 
         public IElevatorMover Initialize(IElevator elevator)
         {
@@ -116,27 +115,12 @@ namespace ElevatorSimulation.Domain.Services
 
         internal Task LoadPassengersAsync(FloorRequest floorRequest)
         {
-            //TODO: we need to check for the next trip in the FloorRequests list
             if (elevator.CurrentFloor == floorRequest.CallingFloor)
             {
-                if (elevator.IsFull(floorRequest.PassengerCount))
-                {
-                    //handle Excess passagers here
-                    OnElevatorPassangerChanges(floorRequest);
-                }
-                else
-                {
-                    elevator.IncrementPassengerCount(floorRequest.PassengerCount);
-                    OnElevatorStatusChanged(floorRequest.CallingFloor, floorRequest.TargetFloor, enElevatorDoorState.Opened);
-                }
+                elevator.IncrementPassengerCount(floorRequest.PassengerCount);
+                OnElevatorStatusChanged(floorRequest.CallingFloor, floorRequest.TargetFloor, enElevatorDoorState.Opened);
             }
             return Task.CompletedTask;
-        }
-
-        private void OnElevatorPassangerChanges(FloorRequest floorRequest)
-        {
-            var excessPassangers = elevator.GetExcessPassangers(floorRequest.PassengerCount);
-            ElevatorPassangerCountChanged?.Invoke(elevator.Id, floorRequest.CallingFloor, floorRequest.TargetFloor, excessPassangers);
         }
 
         private void OnElevatorStatusChanged(int callingFloor, int targetFloor, enElevatorDoorState elevatorState)

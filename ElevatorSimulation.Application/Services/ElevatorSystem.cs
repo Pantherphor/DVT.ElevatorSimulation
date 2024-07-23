@@ -1,5 +1,4 @@
-﻿using ElevatorSimulation.Application.Services;
-using ElevatorSimulation.Application.Strategies;
+﻿using ElevatorSimulation.Application.Strategies;
 using ElevatorSimulation.Domain.Entities;
 using ElevatorSimulation.Domain.Enums;
 using ElevatorSimulation.Domain.Interfaces;
@@ -25,6 +24,7 @@ namespace ElevatorSimulation.Services
             {
                 var mover = elevator.ElevatorMover;
                 mover.ElevatorStatusChanged += HandleElevatorStatusChanged;
+                elevator.ElevatorRequestOverloadChanged += HandleElevatorRequestOverloadChanged;
 
                 elevatorStatuses[elevator.Id] = new ElevatorStatus
                 {
@@ -38,6 +38,12 @@ namespace ElevatorSimulation.Services
 
                 elevatorHistory[elevator.Id] = new List<ElevatorMovementHistory>();
             }
+        }
+
+        private void HandleElevatorRequestOverloadChanged(FloorRequest request)
+        {
+            var nearestElevator = GetNearestElevator(request);
+            overloadStrategy.HandleOverloadAsync(this, nearestElevator, request.CallingFloor, request.TargetFloor, request.PassengerCount).Wait();
         }
 
         private void HandleElevatorStatusChanged(int elevatorId, enElevatorDirection direction, int callingFloor, int currentFloor, int targetFloor, bool isMoving, enElevatorDoorState doorState)
@@ -88,14 +94,32 @@ namespace ElevatorSimulation.Services
 
         public async Task CallElevatorAsync(FloorRequest request)
         {
+            var nearestElevator = GetNearestElevator(request);
+
+            if (nearestElevator != null)
+            {
+                if (nearestElevator.IsFull(request.PassengerCount))
+                {
+                    await overloadStrategy.HandleOverloadAsync(this, nearestElevator, request.CallingFloor, request.TargetFloor, request.PassengerCount);
+                }
+                else
+                {
+                    nearestElevator.AddFloorRequest(request);
+                }
+                await MoveElevatorAsync(nearestElevator.Id, nearestElevator.CallingFloor);
+            }
+        }
+
+        private IElevator GetNearestElevator(FloorRequest request)
+        {
             var nearestElevator = Elevators
-                                    .Where(e => !e.IsMoving || !e.FloorRequests.Any())
-                                    .OrderBy(e => Math.Abs(e.CurrentFloor - request.CallingFloor))
-                                    .ThenBy(e => e.PassengerCount)
-                                    .ThenBy(e => e.Direction == enElevatorDirection.None ? 0 : 1)
-                                    .ThenBy(e => (e.Direction == enElevatorDirection.Up && request.CallingFloor >= e.CurrentFloor) ||
-                                                    (e.Direction == enElevatorDirection.Down && request.CallingFloor <= e.CurrentFloor) ? 0 : 1)
-                                    .FirstOrDefault();
+                                                .Where(e => !e.IsMoving || !e.FloorRequests.Any())
+                                                .OrderBy(e => Math.Abs(e.CurrentFloor - request.CallingFloor))
+                                                .ThenBy(e => e.PassengerCount)
+                                                .ThenBy(e => e.Direction == enElevatorDirection.None ? 0 : 1)
+                                                .ThenBy(e => (e.Direction == enElevatorDirection.Up && request.CallingFloor >= e.CurrentFloor) ||
+                                                                (e.Direction == enElevatorDirection.Down && request.CallingFloor <= e.CurrentFloor) ? 0 : 1)
+                                                .FirstOrDefault();
 
             if (nearestElevator == null)
             {
@@ -106,27 +130,7 @@ namespace ElevatorSimulation.Services
                                     .FirstOrDefault();
             }
 
-            if (nearestElevator != null)
-            {
-                if (nearestElevator.IsFull(request.PassengerCount))
-                {
-                    int excessPassengers = nearestElevator.GetExcessPassangers(request.PassengerCount);
-                    var floorRequest = new FloorRequest(
-                        request.CallingFloor, 
-                        request.TargetFloor, 
-                        (request.PassengerCount - excessPassengers)
-                        );
-
-                    nearestElevator.AddFloorRequest(floorRequest);
-                    overloadStrategy.HandleOverload(this, nearestElevator, request.CallingFloor, request.TargetFloor, excessPassengers);
-                }
-                else
-                {
-                    nearestElevator.AddFloorRequest(new FloorRequest(request.CallingFloor, request.TargetFloor, request.PassengerCount));
-                }
-
-                await MoveElevatorAsync(nearestElevator.Id, nearestElevator.CallingFloor);
-            }
+            return nearestElevator;
         }
 
         public async Task MoveElevatorAsync(int elevatorId, int floor)

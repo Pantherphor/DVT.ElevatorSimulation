@@ -113,7 +113,7 @@ namespace ElevatorSimulation.Application.Tests
 
             // Assert
             var overloadedElevator = mockElevators[0].Object;
-            overloadStrategyMock.Verify(s => s.HandleOverload(elevatorSystem, overloadedElevator, request.CallingFloor, request.TargetFloor, 5), Times.Once);
+            overloadStrategyMock.Verify(s => s.HandleOverloadAsync(elevatorSystem, overloadedElevator, request.CallingFloor, request.TargetFloor, 10), Times.Once);
         }
 
         [Fact]

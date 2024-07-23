@@ -26,6 +26,8 @@ namespace ElevatorSimulation.Domain.Entities
 
         private readonly IElevatorMover elevatorMover;
 
+        public event Action<FloorRequest> ElevatorRequestOverloadChanged;
+
         public Elevator(IElevatorMover elevatorMover)
         {
             CurrentFloor = 0;
@@ -40,9 +42,16 @@ namespace ElevatorSimulation.Domain.Entities
         public IElevatorMover ElevatorMover => this.elevatorMover;
 
 
-        public void AddFloorRequest(FloorRequest targetFloor)
+        public void AddFloorRequest(FloorRequest floorRequest)
         {
-            FloorRequests.Add(targetFloor);
+            if (!IsFull(floorRequest.PassengerCount))
+            {
+                FloorRequests.Add(floorRequest);
+            }
+            else
+            {
+                ElevatorRequestOverloadChanged?.Invoke(floorRequest);
+            }
         }
 
         public async Task MoveToNextFloorAsync()

@@ -1,9 +1,16 @@
-﻿using ElevatorSimulation.Domain.Enums;
+﻿using ElevatorSimulation.Domain.Entities;
+using ElevatorSimulation.Domain.Enums;
 using ElevatorSimulation.Domain.Services;
+using System;
 
 namespace ElevatorSimulation.Domain.Interfaces
 {
-    public interface IElevator : IElevatorOparations
+    public interface IElevatorEvents
+    {
+        event Action<FloorRequest> ElevatorRequestOverloadChanged;
+    }
+
+    public interface IElevator : IElevatorOparations, IElevatorEvents
     {
         int Id { get; set; }
         int CurrentFloor { get; }

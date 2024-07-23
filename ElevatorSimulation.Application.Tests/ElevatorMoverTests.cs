@@ -1,4 +1,5 @@
 ﻿using ElevatorSimulation.Domain.Entities;
+using ElevatorSimulation.Domain.Enums;
 using ElevatorSimulation.Domain.Interfaces;
 using ElevatorSimulation.Domain.Services;
 using Moq;
@@ -337,15 +338,15 @@ namespace ElevatorSimulation.Application.Tests
             var floorRequest = new FloorRequest(5, targetFloor: 5, passengerCount: 5);
 
             // Mock the event handler
-            var mockEventHandler = new Mock<Action<int, int, int, int>>();
-            mover.ElevatorPassangerCountChanged += mockEventHandler.Object;
+            var mockEventHandler = new Mock<Action<int, enElevatorDirection, int, int, int, bool, enElevatorDoorState>>();
+            mover.ElevatorStatusChanged += mockEventHandler.Object;
 
 
             // Act
             await mover.LoadPassengersAsync(floorRequest);
 
             // Assert
-            mockEventHandler.Verify(o => o(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<int>()), Times.Once);
+            mockEventHandler.Verify(o => o(It.IsAny<int>(), It.IsAny<enElevatorDirection>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<int>(), It.IsAny<bool>(), It.IsAny<enElevatorDoorState>()), Times.Once);
         }
     }
 }

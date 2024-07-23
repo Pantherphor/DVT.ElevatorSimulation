@@ -53,7 +53,7 @@ namespace ElevatorSimulation.InterfaceAdapters
             Console.WriteLine(ConsoleControllerConstants.QuitOption);
         }
 
-        internal void CallElevator()
+        internal void CallElevator()//TODO: Made async
         {
             Console.Write(ConsoleControllerConstants.EnterFloorNumberMessage);
             if (int.TryParse(Console.ReadLine(), out int callingFloor))
@@ -82,7 +82,7 @@ namespace ElevatorSimulation.InterfaceAdapters
             }
         }
 
-        internal void MoveElevator()
+        internal void MoveElevator()//TODO: Made async
         {
             Console.Write(ConsoleControllerConstants.EnterElevatorIdMessage);
             if (int.TryParse(Console.ReadLine(), out int elevatorId))
@@ -103,7 +103,7 @@ namespace ElevatorSimulation.InterfaceAdapters
             }
         }
 
-        internal void ShowElevatorStatus()
+        internal void ShowElevatorStatus() //TODO: Made async
         {
             var elevatorHistory = elevatorControlUseCase.GetElevatorMovementHistory();
             DisplayElevatorHistory(elevatorHistory);
