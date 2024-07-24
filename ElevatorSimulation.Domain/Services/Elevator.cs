@@ -1,6 +1,6 @@
-﻿using ElevatorSimulation.Domain.Enums;
+﻿using ElevatorSimulation.Domain.Entities;
+using ElevatorSimulation.Domain.Enums;
 using ElevatorSimulation.Domain.Interfaces;
-using ElevatorSimulation.Domain.Services;
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 [assembly: InternalsVisibleTo("DynamicProxyGenAssembly2")]
 [assembly: InternalsVisibleTo("DynamicProxyGenAssembly22")]
-namespace ElevatorSimulation.Domain.Entities
+namespace ElevatorSimulation.Domain.Services
 {
     public class Elevator : IElevator
     {
