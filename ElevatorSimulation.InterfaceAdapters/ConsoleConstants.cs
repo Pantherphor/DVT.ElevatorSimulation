@@ -1,6 +1,6 @@
 ﻿namespace ElevatorSimulation.InterfaceAdapters
 {
-    public static class ConsoleControllerConstants
+    public static class ConsoleConstants
     {
         public const string MenuPrompt = "Select an option:";
         public const string CallElevatorOption = "1. Call Elevator";
