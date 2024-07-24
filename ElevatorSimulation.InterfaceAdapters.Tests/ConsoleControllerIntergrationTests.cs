@@ -72,7 +72,7 @@ namespace ElevatorSimulation.InterfaceAdapters.Tests
         [Trait("Category", "Integration")]
         public void CallElevator_Should_Show_Error_On_Invalid_Floor_Input()
         {
-            using var sr = new StringReader("invalid\n");
+            using var sr = new StringReader("1\ninvalid\ninvalid\n");
             using var sw = new StringWriter();
             Console.SetIn(sr);
             Console.SetOut(sw);
