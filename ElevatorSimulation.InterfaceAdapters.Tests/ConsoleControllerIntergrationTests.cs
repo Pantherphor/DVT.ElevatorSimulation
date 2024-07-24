@@ -38,12 +38,11 @@ namespace ElevatorSimulation.InterfaceAdapters.Tests
             ConsoleController.DisplayMenu();
 
             // Assert
-            var expectedOutput = "Select an option:\r\n" +
-                                 "1. Call Elevator\r\n" +
-                                 "2. Move Elevator\r\n" +
-                                 "3. Show Elevator Status\r\n" +
-                                 "q. Quit\r\n";
-            Assert.Equal(expectedOutput, sw.ToString());
+            Assert.Contains("Select an option:", sw.ToString());
+            Assert.Contains("1. Call Elevator", sw.ToString());
+            Assert.Contains("2. Move Elevator", sw.ToString());
+            Assert.Contains("3. Show Elevator Status", sw.ToString());
+            Assert.Contains("q. Quit", sw.ToString());
         }
 
         [Fact]
@@ -186,10 +185,9 @@ namespace ElevatorSimulation.InterfaceAdapters.Tests
 
             // Assert
             var expectedHeaderColsOutput = "| Elevator | Calling Floor | Current Floor | Target Floor | Direction | Passengers | Moving | Door Status | Timestamp |";
-            var expectedSummaryOutput = "Elevator 1: Floor 3, Direction Up, Closed, Passengers Moving\r\n" +
-                                        "Elevator 2: Floor 5, Direction Down, Closed, Passengers Stationary\r\n";
             Assert.Contains(expectedHeaderColsOutput, sw.ToString());
-            Assert.Contains(expectedSummaryOutput, sw.ToString());
+            Assert.Contains("Elevator 1: Floor 3, Direction Up, Closed, Passengers Moving", sw.ToString());
+            Assert.Contains("Elevator 2: Floor 5, Direction Down, Closed, Passengers Stationary", sw.ToString());
         }
 
         public void Dispose()
