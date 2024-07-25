@@ -3,6 +3,7 @@ using ElevatorSimulation.Domain.Entities;
 using ElevatorSimulation.Domain.Interfaces;
 using ElevatorSimulation.Domain.Services;
 using ElevatorSimulation.InterfaceAdapters;
+using ElevatorSimulation.InterfaceAdapters.Adapters;
 using ElevatorSimulation.Services;
 using System.Collections.Generic;
 
@@ -20,7 +21,8 @@ namespace ElevatorSimulation.ConsoleApp
             var elevatorSystem = new ElevatorSystem(elevators);
             var building = new Building(elevatorSystem);
             var useCase = new ElevatorControlUseCase(building);
-            var controller = new ConsoleController(useCase);
+            var console = new ConsoleAdapter();
+            var controller = new ConsoleController(useCase, console);
 
             controller.Run();
         }

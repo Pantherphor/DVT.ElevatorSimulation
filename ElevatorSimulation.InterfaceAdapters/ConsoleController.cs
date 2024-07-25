@@ -1,6 +1,6 @@
 ﻿using ElevatorSimulation.Application.UseCases;
 using ElevatorSimulation.Domain.Entities;
-using System;
+using ElevatorSimulation.InterfaceAdapters.Interfaces;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -11,10 +11,12 @@ namespace ElevatorSimulation.InterfaceAdapters
     public class ConsoleController
     {
         private readonly IElevatorControlUseCase elevatorControlUseCase;
+        private readonly IConsole console;
 
-        public ConsoleController(IElevatorControlUseCase elevatorControlUseCase)
+        public ConsoleController(IElevatorControlUseCase elevatorControlUseCase, IConsole console)
         {
             this.elevatorControlUseCase = elevatorControlUseCase;
+            this.console = console;
         }
 
         public void Run()
@@ -22,7 +24,7 @@ namespace ElevatorSimulation.InterfaceAdapters
             while (true)
             {
                 DisplayMenu();
-                var option = Console.ReadLine();
+                var option = console.ReadLine();
 
                 switch (option)
                 {
@@ -38,68 +40,68 @@ namespace ElevatorSimulation.InterfaceAdapters
                     case "q":
                         return;
                     default:
-                        Console.WriteLine(ConsoleConstants.InvalidOptionMessage);
+                        console.WriteLine(ConsoleConstants.InvalidOptionMessage);
                         break;
                 }
             }
         }
 
-        internal static void DisplayMenu()
+        internal void DisplayMenu()
         {
-            Console.WriteLine(ConsoleConstants.MenuPrompt);
-            Console.WriteLine(ConsoleConstants.CallElevatorOption);
-            Console.WriteLine(ConsoleConstants.MoveElevatorOption);
-            Console.WriteLine(ConsoleConstants.ShowElevatorStatusOption);
-            Console.WriteLine(ConsoleConstants.QuitOption);
+            console.WriteLine(ConsoleConstants.MenuPrompt);
+            console.WriteLine(ConsoleConstants.CallElevatorOption);
+            console.WriteLine(ConsoleConstants.MoveElevatorOption);
+            console.WriteLine(ConsoleConstants.ShowElevatorStatusOption);
+            console.WriteLine(ConsoleConstants.QuitOption);
         }
 
         internal async void CallElevator()
         {
-            Console.Write(ConsoleConstants.EnterFloorNumberMessage);
-            if (int.TryParse(Console.ReadLine(), out int callingFloor))
+            console.Write(ConsoleConstants.EnterFloorNumberMessage);
+            if (int.TryParse(console.ReadLine(), out int callingFloor))
             {
-                Console.Write(ConsoleConstants.EnterTargetFloorNumberMessage);
-                if (int.TryParse(Console.ReadLine(), out int targetFloor))
+                console.Write(ConsoleConstants.EnterTargetFloorNumberMessage);
+                if (int.TryParse(console.ReadLine(), out int targetFloor))
                 {
-                    Console.Write(ConsoleConstants.EnterPassengerCountMessage);
-                    if (int.TryParse(Console.ReadLine(), out int passengers))
+                    console.Write(ConsoleConstants.EnterPassengerCountMessage);
+                    if (int.TryParse(console.ReadLine(), out int passengers))
                     {
                         await elevatorControlUseCase.CallElevatorAsync(new FloorRequest(callingFloor, targetFloor, passengers));
                     }
                     else
                     {
-                        Console.WriteLine(ConsoleConstants.InvalidPassengerCountMessage);
+                        console.WriteLine(ConsoleConstants.InvalidPassengerCountMessage);
                     }
                 }
                 else
                 {
-                    Console.WriteLine(ConsoleConstants.InvalidFloorNumberMessage);
+                    console.WriteLine(ConsoleConstants.InvalidFloorNumberMessage);
                 }
             }
             else
             {
-                Console.WriteLine(ConsoleConstants.InvalidFloorNumberMessage);
+                console.WriteLine(ConsoleConstants.InvalidFloorNumberMessage);
             }
         }
 
         internal async void MoveElevator()
         {
-            Console.Write(ConsoleConstants.EnterElevatorIdMessage);
-            if (int.TryParse(Console.ReadLine(), out int elevatorId))
+            console.Write(ConsoleConstants.EnterElevatorIdMessage);
+            if (int.TryParse(console.ReadLine(), out int elevatorId))
             {
-                Console.Write(ConsoleConstants.EnterMoveToFloorNumberMessage);
-                if (int.TryParse(Console.ReadLine(), out int floor))
+                console.Write(ConsoleConstants.EnterMoveToFloorNumberMessage);
+                if (int.TryParse(console.ReadLine(), out int floor))
                 {
                     await elevatorControlUseCase.MoveElevatorAsync(elevatorId, floor);
                 }
                 else
                 {
-                    Console.WriteLine(ConsoleConstants.InvalidFloorNumberMessage);
+                    console.WriteLine(ConsoleConstants.InvalidFloorNumberMessage);
                 }
             }
             else
             {
-                Console.WriteLine(ConsoleConstants.InvalidElevatorIdMessage);
+                console.WriteLine(ConsoleConstants.InvalidElevatorIdMessage);
             }
         }
 
@@ -107,16 +109,15 @@ namespace ElevatorSimulation.InterfaceAdapters
         {
             var elevatorHistory = elevatorControlUseCase.GetElevatorMovementHistory();
             DisplayElevatorHistory(elevatorHistory);
-            
-            DisplayElecatorStatusSummery();
+            DisplayElevatorStatusSummary();
         }
 
-        private void DisplayElecatorStatusSummery()
+        private void DisplayElevatorStatusSummary()
         {
             var statuses = elevatorControlUseCase.GetElevatorStatus();
             foreach (var status in statuses)
             {
-                Console.WriteLine(
+                console.WriteLine(
                     string.Format(
                         ConsoleConstants.ElevatorStatusMessageFormat,
                         status.Id,
@@ -130,23 +131,21 @@ namespace ElevatorSimulation.InterfaceAdapters
             }
         }
 
-        private static void DisplayElevatorHistory(IDictionary<int, IList<ElevatorMovementHistory>> elevatorHistory)
+        private void DisplayElevatorHistory(IDictionary<int, IList<ElevatorMovementHistory>> elevatorHistory)
         {
             DisplayHistoryTableHeader();
             foreach (var history in elevatorHistory.Values.SelectMany(h => h))
             {
-                Console.WriteLine($"| {history.ElevatorId,8} | {history.CallingFloor,13} | {history.CurrentFloor,13} | {history.TargetFloor,12} | {history.Direction,-9} | {history.PassengerCount,10} | {history.IsMoving,6} | {history.DoorState,11} | {history.Timestamp:HH:mm:ss} |");
+                console.WriteLine($"| {history.ElevatorId,8} | {history.CallingFloor,13} | {history.CurrentFloor,13} | {history.TargetFloor,12} | {history.Direction,-9} | {history.PassengerCount,10} | {history.IsMoving,6} | {history.DoorState,11} | {history.Timestamp:HH:mm:ss} |");
             }
-            Console.WriteLine(ConsoleConstants.TableHistorySeparator);
+            console.WriteLine(ConsoleConstants.TableHistorySeparator);
         }
 
-        private static void DisplayHistoryTableHeader()
+        private void DisplayHistoryTableHeader()
         {
-            Console.WriteLine(ConsoleConstants.TableHistorySeparator);
-            Console.WriteLine(ConsoleConstants.TableHistoryHeader);
-            Console.WriteLine(ConsoleConstants.TableHistorySeparator);
+            console.WriteLine(ConsoleConstants.TableHistorySeparator);
+            console.WriteLine(ConsoleConstants.TableHistoryHeader);
+            console.WriteLine(ConsoleConstants.TableHistorySeparator);
         }
-
     }
-
 }

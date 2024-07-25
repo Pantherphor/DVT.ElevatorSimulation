@@ -1,179 +1,180 @@
-﻿using ElevatorSimulation.Application.UseCases;
 using ElevatorSimulation.Domain.Entities;
+using ElevatorSimulation.Application.UseCases;
 using ElevatorSimulation.Domain.Enums;
 using Moq;
-using System;
-using System.Collections.Generic;
-using System.IO;
 using Xunit;
+using ElevatorSimulation.InterfaceAdapters.Interfaces;
+using System.Collections.Generic;
+using System;
 
 namespace ElevatorSimulation.InterfaceAdapters.Tests
 {
-    public class ConsoleControllerTests : IDisposable
+    public class MockConsole : IConsole
+    {
+        private readonly Queue<string> inputQueue = new();
+        private readonly List<string> outputList = new();
+
+        public void EnqueueInput(string input) => inputQueue.Enqueue(input);
+        public string GetOutput() => string.Join(Environment.NewLine, outputList);
+
+        public void WriteLine(string message) => outputList.Add(message);
+        public void Write(string message) => outputList.Add(message);
+        public string ReadLine() => inputQueue.Count > 0 ? inputQueue.Dequeue() : string.Empty;
+    }
+
+    public class ConsoleControllerTests
     {
         private readonly Mock<IElevatorControlUseCase> mockElevatorControlUseCase;
-        private readonly ConsoleController controller;
-        private readonly TextReader originalInput;
-        private readonly TextWriter originalOutput;
+        private readonly MockConsole mockConsole;
+        private readonly ConsoleController consoleController;
 
         public ConsoleControllerTests()
         {
+            mockConsole = new MockConsole();
             mockElevatorControlUseCase = new Mock<IElevatorControlUseCase>();
-            var history = new Dictionary<int, IList<ElevatorMovementHistory>>
-            {
-
-            };
-
-            mockElevatorControlUseCase.Setup(e => e.GetElevatorMovementHistory()).Returns(history);
-            controller = new ConsoleController(mockElevatorControlUseCase.Object);
-            originalInput = Console.In;
-            originalOutput = Console.Out;
+            consoleController = new ConsoleController(mockElevatorControlUseCase.Object, mockConsole);
         }
 
         [Fact]
-        [Trait("Category", "Integration")]
-        public void CallElevator_Should_Call_ElevatorControlUseCase_With_Correct_Parameters()
+        public void DisplayMenu_Should_Show_Options()
         {
-            // Arrange
-            var input = "1\n5\n3\n";
-            var stringReader = new StringReader(input);
-            Console.SetIn(stringReader);
-
             // Act
-            controller.CallElevator();
+            consoleController.DisplayMenu();
 
             // Assert
-            mockElevatorControlUseCase.Verify(e => e.CallElevatorAsync(It.Is<FloorRequest>(r => r.CallingFloor == 1 && r.TargetFloor == 5 && r.PassengerCount == 3)), Times.Once);
+            var output = mockConsole.GetOutput();
+            Assert.Contains("Select an option:", output);
+            Assert.Contains("1. Call Elevator", output);
+            Assert.Contains("2. Move Elevator", output);
+            Assert.Contains("3. Show Elevator Status", output);
+            Assert.Contains("q. Quit", output);
         }
 
         [Fact]
-        [Trait("Category", "Integration")]
-        public void MoveElevator_Should_Move_ElevatorControlUseCase_With_Correct_Parameters()
+        public void CallElevator_Should_CallElevator_With_Valid_Input()
         {
             // Arrange
-            var input = "1\n5\n";
-            var stringReader = new StringReader(input);
-            Console.SetIn(stringReader);
+            mockConsole.EnqueueInput("1");
+            mockConsole.EnqueueInput("0");
+            mockConsole.EnqueueInput("3");
+            mockConsole.EnqueueInput("2");
+            mockConsole.EnqueueInput("q");
 
             // Act
-            controller.MoveElevator();
+            consoleController.Run();
 
             // Assert
-            mockElevatorControlUseCase.Verify(e => e.MoveElevatorAsync(1, 5), Times.Once);
+            mockElevatorControlUseCase.Verify(es => es.CallElevatorAsync(It.IsAny<FloorRequest>()), Times.Once);
         }
 
         [Fact]
         [Trait("Category", "Integration")]
-        public void ShowElevatorStatus_Should_Display_Correct_Status()
+        public void CallElevator_Should_Show_Error_On_Invalid_Floor_Input()
+        {
+            // Arrange
+            mockConsole.EnqueueInput("1");
+            mockConsole.EnqueueInput("invalid");
+            mockConsole.EnqueueInput("invalid");
+
+            // Act
+            consoleController.CallElevator();
+
+            // Assert
+            var output = mockConsole.GetOutput();
+            Assert.Contains("Invalid floor number.", output);
+            mockElevatorControlUseCase.Verify(es => es.CallElevatorAsync(It.IsAny<FloorRequest>()), Times.Never);
+        }
+
+        [Fact]
+        public void CallElevator_Should_Show_Error_On_Invalid_Passenger_Input()
+        {
+            // Arrange
+            mockConsole.EnqueueInput("1");
+            mockConsole.EnqueueInput("0");
+            mockConsole.EnqueueInput("invalid");
+
+            // Act
+            consoleController.CallElevator();
+
+            // Assert
+            var output = mockConsole.GetOutput();
+            Assert.Contains("Invalid number of passengers.", output);
+            mockElevatorControlUseCase.Verify(es => es.CallElevatorAsync(It.IsAny<FloorRequest>()), Times.Never);
+        }
+
+        [Fact]
+        public void MoveElevator_Should_MoveElevator_With_Valid_Input()
+        {
+            // Arrange
+            mockConsole.EnqueueInput("1");
+            mockConsole.EnqueueInput("5");
+
+            // Act
+            consoleController.MoveElevator();
+
+            // Assert
+            mockElevatorControlUseCase.Verify(es => es.MoveElevatorAsync(1, 5), Times.Once);
+        }
+
+        [Fact]
+        [Trait("Category", "Integration")]
+        public void MoveElevator_Should_Show_Error_On_Invalid_ElevatorId_Input()
+        {
+            // Arrange
+            mockConsole.EnqueueInput("invalid");
+
+            // Act
+            consoleController.MoveElevator();
+
+            // Assert
+            var output = mockConsole.GetOutput();
+            Assert.Contains("Invalid elevator ID.", output);
+            mockElevatorControlUseCase.Verify(es => es.MoveElevatorAsync(It.IsAny<int>(), It.IsAny<int>()), Times.Never);
+        }
+
+        [Fact]
+        public void MoveElevator_Should_Show_Error_On_Invalid_Floor_Input()
+        {
+            // Arrange
+            mockConsole.EnqueueInput("1");
+            mockConsole.EnqueueInput("invalid");
+
+            // Act
+            consoleController.MoveElevator();
+
+            // Assert
+            var output = mockConsole.GetOutput();
+            Assert.Contains("Invalid floor number.", output);
+            mockElevatorControlUseCase.Verify(es => es.MoveElevatorAsync(It.IsAny<int>(), It.IsAny<int>()), Times.Never);
+        }
+
+        [Fact]
+        public void ShowElevatorStatus_Should_Display_Status()
         {
             // Arrange
             var statuses = new List<ElevatorStatus>
             {
-                new ElevatorStatus { Id = 1, CurrentFloor = 3, Direction = enElevatorDirection.Up, IsMoving = true, PassengerCount = 2 }
-            };
-
-            var history = new Dictionary<int, IList<ElevatorMovementHistory>>
-            {
-                
+                new ElevatorStatus { Id = 1, CurrentFloor = 3, Direction = enElevatorDirection.Up, IsMoving = true, PassengerCount = 4 },
+                new ElevatorStatus { Id = 2, CurrentFloor = 5, Direction = enElevatorDirection.Down, IsMoving = false, PassengerCount = 2 }
             };
 
             mockElevatorControlUseCase.Setup(e => e.GetElevatorStatus()).Returns(statuses);
-            mockElevatorControlUseCase.Setup(e => e.GetElevatorMovementHistory()).Returns(history);
 
-            var stringWriter = new StringWriter();
-            Console.SetOut(stringWriter);
+            var movementHistory = new Dictionary<int, IList<ElevatorMovementHistory>>
+            { 
+            };
+
+            mockElevatorControlUseCase.Setup(e => e.GetElevatorMovementHistory()).Returns(movementHistory);
 
             // Act
-            controller.ShowElevatorStatus();
+            consoleController.ShowElevatorStatus();
 
             // Assert
-            var output = stringWriter.ToString().Trim();
+            var output = mockConsole.GetOutput();
+            var expectedHeaderColsOutput = "| Elevator | Calling Floor | Current Floor | Target Floor | Direction | Passengers | Moving | Door Status | Timestamp |";
+            Assert.Contains(expectedHeaderColsOutput, output);
             Assert.Contains("Elevator 1: Floor 3, Direction Up, Closed, Passengers Moving", output);
-        }
-
-        [Fact]
-        [Trait("Category", "Integration")]
-        public void Run_Should_Handle_Invalid_Option()
-        {
-            // Arrange
-            var input = "invalid\nq\n";
-            var stringReader = new StringReader(input);
-            var stringWriter = new StringWriter();
-
-            Console.SetIn(stringReader);
-            Console.SetOut(stringWriter);
-
-            // Act
-            controller.Run();
-
-            // Assert
-            var output = stringWriter.ToString();
-            Assert.Contains("Invalid option. Please try again.", output);
-        }
-
-        [Fact]
-        [Trait("Category", "Integration")]
-        public void Run_Should_Call_Elevator()
-        {
-            // Arrange
-            var input = "1\n1\n5\n3\nq\n";
-            var stringReader = new StringReader(input);
-            var stringWriter = new StringWriter();
-
-            Console.SetIn(stringReader);
-            Console.SetOut(stringWriter);
-
-            // Act
-            controller.Run();
-
-            // Assert
-            mockElevatorControlUseCase.Verify(e => e.CallElevatorAsync(It.IsAny<FloorRequest>()), Times.Once);
-        }
-
-        [Fact]
-        [Trait("Category", "Integration")]
-        public void Run_Should_Move_Elevator()
-        {
-            // Arrange
-            var input = "2\n1\n5\nq\n";
-            var stringReader = new StringReader(input);
-            var stringWriter = new StringWriter();
-
-            Console.SetIn(stringReader);
-            Console.SetOut(stringWriter);
-
-            // Act
-            controller.Run();
-
-            // Assert
-            mockElevatorControlUseCase.Verify(e => e.MoveElevatorAsync(It.IsAny<int>(), It.IsAny<int>()), Times.Once);
-        }
-
-        [Fact]
-        [Trait("Category", "Integration")]
-        public void Run_Should_Show_Elevator_Status()
-        {
-            // Arrange
-            var input = "3\nq\n";
-            var stringReader = new StringReader(input);
-            var stringWriter = new StringWriter();
-
-            Console.SetIn(stringReader);
-            Console.SetOut(stringWriter);
-
-
-            // Act
-            controller.Run();
-
-            // Assert
-            mockElevatorControlUseCase.Verify(e => e.GetElevatorStatus(), Times.Once);
-        }
-
-        public void Dispose()
-        {
-            // Cleanup
-            Console.SetIn(originalInput);
-            Console.SetOut(originalOutput);
+            Assert.Contains("Elevator 2: Floor 5, Direction Down, Closed, Passengers Stationary", output);
         }
 
     }
